@@ -861,6 +861,8 @@ local player = Players.LocalPlayer
 	print("[MCJ] Float VIP executed.")  
 ]])()
 
+end)
+
 -- =========================
 -- NÚT 15: Steal Floor 3
 -- =========================
@@ -957,7 +959,6 @@ makeButton("Steal Floor 3", function()
         end
     end)
 end)
-
 -- =========================
 -- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
