@@ -919,7 +919,7 @@ makeButton("Steal Floor 3", function()
             stealBlock = Instance.new("Part")
             stealBlock.Size = Vector3.new(100,1,100)
             stealBlock.Anchored = true
-            stealBlock.Transparency = 1 -- block tàng hình
+            stealBlock.Transparency = 0.6 -- block tàng hình
             stealBlock.Position = hrp.Position - Vector3.new(0,3,0)
             stealBlock.Color = Color3.fromRGB(255, 100, 0)
             stealBlock.Material = Enum.Material.Neon
@@ -928,7 +928,7 @@ makeButton("Steal Floor 3", function()
             -- Tween block đi lên 10 studs
             local TweenService = game:GetService("TweenService")
             local goal = {}
-            goal.Position = Vector3.new(hrp.Position.X, hrp.Position.Y + 10, hrp.Position.Z)
+            goal.Position = Vector3.new(hrp.Position.X, hrp.Position.Y + 20, hrp.Position.Z)
             local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
             local tween = TweenService:Create(stealBlock, tweenInfo, goal)
             tween:Play()
@@ -959,6 +959,7 @@ makeButton("Steal Floor 3", function()
         end
     end)
 end)
+
 -- =========================
 -- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
