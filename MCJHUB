@@ -928,7 +928,7 @@ makeButton("Steal Floor 3", function()
             -- Tween block đi lên 10 studs
             local TweenService = game:GetService("TweenService")
             local goal = {}
-            goal.Position = Vector3.new(hrp.Position.X, hrp.PositileftCol 10, hrp.Position.Z)
+            goal.Position = Vector3.new(hrp.Position.X, hrp.PositileftCol.10, hrp.Position.Z)
             local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
             local tween = TweenService:Create(stealBlock, tweenInfo, goal)
             tween:Play()
