@@ -911,14 +911,15 @@ makeButton("Steal Floor 3", function()
         return btn
     end
 
-    -- 🔼 Steal
-    subButton("🔼 Steal", 40, function()
+    -- Steal
+    subButton("Steal", 40, function()
         local char = player.Character or player.CharacterAdded:Wait()
         local hrp = char:FindFirstChild("HumanoidRootPart")
         if hrp and not stealBlock then
             stealBlock = Instance.new("Part")
             stealBlock.Size = Vector3.new(100,1,100)
             stealBlock.Anchored = true
+            stealBlock.Transparency = 1 -- block tàng hình
             stealBlock.Position = hrp.Position - Vector3.new(0,3,0)
             stealBlock.Color = Color3.fromRGB(255, 100, 0)
             stealBlock.Material = Enum.Material.Neon
@@ -932,25 +933,33 @@ makeButton("Steal Floor 3", function()
             local tween = TweenService:Create(stealBlock, tweenInfo, goal)
             tween:Play()
 
-            -- Làm toàn bộ Part trong suốt 0.7
+            -- Làm toàn bộ Part trong suốt 0.7 (trừ nhân vật & block)
             for _, obj in ipairs(workspace:GetDescendants()) do
-                if obj:IsA("BasePart") and obj ~= stealBlock then
+                if obj:IsA("BasePart") and obj ~= stealBlock and not obj:IsDescendantOf(char) then
                     obj.Transparency = 0.7
                 end
             end
         end
     end)
 
-    -- ❌ Delete Block
-    subButton("❌ Delete Block", 90, function()
+    -- Delete Block
+    subButton("Delete Block", 90, function()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+
+        -- Xóa block
         if stealBlock then
             stealBlock:Destroy()
             stealBlock = nil
         end
-        -- KHÔNG còn teleport nhân vật nữa
-        -- Transparency giữ nguyên 0.7 (không reset)
+
+        -- Đứng dậy (reset trạng thái nằm)
+        if humanoid then
+            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
     end)
 end)
+
 -- =========================
 -- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
