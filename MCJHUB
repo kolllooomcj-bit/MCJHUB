@@ -37,20 +37,20 @@ layout.SortOrder = Enum.SortOrder.LayoutOrder
 
 -- Auto size canvas
 layout.Changed:Connect(function()
-	scroll.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
+scroll.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
 end)
 
 -- Function tạo nút
 local function makeButton(name, callback)
-	local btn = Instance.new("TextButton", scroll)
-	btn.Size = UDim2.new(0,260,0,45)
-	btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-	btn.TextColor3 = Color3.fromRGB(0,255,150)
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 18
-	btn.Text = name
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
-	btn.MouseButton1Click:Connect(callback)
+local btn = Instance.new("TextButton", scroll)
+btn.Size = UDim2.new(0,260,0,45)
+btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+btn.TextColor3 = Color3.fromRGB(0,255,150)
+btn.Font = Enum.Font.GothamBold
+btn.TextSize = 18
+btn.Text = name
+Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
+btn.MouseButton1Click:Connect(callback)
 end
 
 -- =========================
@@ -59,125 +59,126 @@ end
 local subGui
 
 makeButton("⚡ Jump + Block Menu", function()
-    if subGui and subGui.Parent then
-        subGui:Destroy()
-        subGui = nil
-        return
-    end
+if subGui and subGui.Parent then
+subGui:Destroy()
+subGui = nil
+return
+end
 
-    subGui = Instance.new("ScreenGui", player.PlayerGui)
-    subGui.Name = "MCJ_SubMenu"
-    subGui.ResetOnSpawn = false
+subGui = Instance.new("ScreenGui", player.PlayerGui)  
+subGui.Name = "MCJ_SubMenu"  
+subGui.ResetOnSpawn = false  
 
-    local frame = Instance.new("Frame", subGui)
-    frame.Size = UDim2.new(0, 220, 0, 200)
-    frame.Position = UDim2.new(0.6, 0, 0.4, 0)
-    frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-    frame.Active = true
-    frame.Draggable = true
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0,8)
+local frame = Instance.new("Frame", subGui)  
+frame.Size = UDim2.new(0, 220, 0, 200)  
+frame.Position = UDim2.new(0.6, 0, 0.4, 0)  
+frame.BackgroundColor3 = Color3.fromRGB(30,30,30)  
+frame.Active = true  
+frame.Draggable = true  
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,8)  
 
-    local title = Instance.new("TextLabel", frame)
-    title.Size = UDim2.new(1,0,0,30)
-    title.Text = "⚡ MCJ Script"
-    title.Font = Enum.Font.GothamBold
-    title.TextColor3 = Color3.fromRGB(0,255,150)
-    title.BackgroundColor3 = Color3.fromRGB(50,50,50)
-    title.TextSize = 18
-    Instance.new("UICorner", title).CornerRadius = UDim.new(0,6)
+local title = Instance.new("TextLabel", frame)  
+title.Size = UDim2.new(1,0,0,30)  
+title.Text = "⚡ MCJ Script"  
+title.Font = Enum.Font.GothamBold  
+title.TextColor3 = Color3.fromRGB(0,255,150)  
+title.BackgroundColor3 = Color3.fromRGB(50,50,50)  
+title.TextSize = 18  
+Instance.new("UICorner", title).CornerRadius = UDim.new(0,6)  
 
-    -- hàm tiện
-    local function subButton(text, y, callback)
-        local btn = Instance.new("TextButton", frame)
-        btn.Size = UDim2.new(0, 200, 0, 40)
-        btn.Position = UDim2.new(0,10,0,y)
-        btn.Text = text
-        btn.Font = Enum.Font.GothamBold
-        btn.TextSize = 16
-        btn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-        btn.TextColor3 = Color3.new(1,1,1)
-        Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
-        btn.MouseButton1Click:Connect(callback)
-        return btn
-    end
+-- hàm tiện  
+local function subButton(text, y, callback)  
+    local btn = Instance.new("TextButton", frame)  
+    btn.Size = UDim2.new(0, 200, 0, 40)  
+    btn.Position = UDim2.new(0,10,0,y)  
+    btn.Text = text  
+    btn.Font = Enum.Font.GothamBold  
+    btn.TextSize = 16  
+    btn.BackgroundColor3 = Color3.fromRGB(60,60,60)  
+    btn.TextColor3 = Color3.new(1,1,1)  
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)  
+    btn.MouseButton1Click:Connect(callback)  
+    return btn  
+end  
 
-    -- 🟢 Jump Boost
-    local boostOn = false
-    local jumpBtn = subButton("🟢 Jump Boost", 40, function()
-        local char = player.Character or player.CharacterAdded:Wait()
-        local hum = char:WaitForChild("Humanoid")
-        boostOn = not boostOn
-        if boostOn then
-            hum.UseJumpPower = true
-            hum.JumpPower = hum.JumpPower * 1.5
-            jumpBtn.Text = "⛔ Disable JumpBoost"
-        else
-            hum.UseJumpPower = true
-            hum.JumpPower = 50 -- reset mặc định
-            jumpBtn.Text = "🟢 Jump Boost"
-        end
-    end)
+-- 🟢 Jump Boost  
+local boostOn = false  
+local jumpBtn = subButton("🟢 Jump Boost", 40, function()  
+    local char = player.Character or player.CharacterAdded:Wait()  
+    local hum = char:WaitForChild("Humanoid")  
+    boostOn = not boostOn  
+    if boostOn then  
+        hum.UseJumpPower = true  
+        hum.JumpPower = hum.JumpPower * 1.5  
+        jumpBtn.Text = "⛔ Disable JumpBoost"  
+    else  
+        hum.UseJumpPower = true  
+        hum.JumpPower = 50 -- reset mặc định  
+        jumpBtn.Text = "🟢 Jump Boost"  
+    end  
+end)  
 
-    -- 🟦 Mega Block
-    local blockOn = false
-    local megaBlock
-    local blockBtn = subButton("🟦 Mega Block", 90, function()
-        blockOn = not blockOn
-        if blockOn then
-            megaBlock = Instance.new("Part")
-            megaBlock.Size = Vector3.new(10000,1,10000)
-            megaBlock.Anchored = true
-            megaBlock.Position = player.Character.HumanoidRootPart.Position - Vector3.new(0,5,0)
-            megaBlock.Color = Color3.fromRGB(100,100,255)
-            megaBlock.Transparency = 0.2
-            megaBlock.Parent = workspace
-            blockBtn.Text = "⛔ Remove Block"
-        else
-            if megaBlock then megaBlock:Destroy() megaBlock=nil end
-            blockBtn.Text = "🟦 Mega Block"
-        end
-    end)
+-- 🟦 Mega Block  
+local blockOn = false  
+local megaBlock  
+local blockBtn = subButton("🟦 Mega Block", 90, function()  
+    blockOn = not blockOn  
+    if blockOn then  
+        megaBlock = Instance.new("Part")  
+        megaBlock.Size = Vector3.new(10000,1,10000)  
+        megaBlock.Anchored = true  
+        megaBlock.Position = player.Character.HumanoidRootPart.Position - Vector3.new(0,5,0)  
+        megaBlock.Color = Color3.fromRGB(100,100,255)  
+        megaBlock.Transparency = 0.2  
+        megaBlock.Parent = workspace  
+        blockBtn.Text = "⛔ Remove Block"  
+    else  
+        if megaBlock then megaBlock:Destroy() megaBlock=nil end  
+        blockBtn.Text = "🟦 Mega Block"  
+    end  
+end)  
 
-    -- 🔼 Throw Up
-    local function throwUp()
-        local char = player.Character or player.CharacterAdded:Wait()
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            -- tạo block giả
-            local block = Instance.new("Part")
-            block.Size = Vector3.new(6,1,6)
-            block.Anchored = false
-            block.CanCollide = false -- không va chạm part khác
-            block.Transparency = 1 -- ẩn block
-            block.Parent = workspace
-            block.CFrame = hrp.CFrame - Vector3.new(0,3,0)
+-- 🔼 Throw Up  
+local function throwUp()  
+    local char = player.Character or player.CharacterAdded:Wait()  
+    local hrp = char:FindFirstChild("HumanoidRootPart")  
+    if hrp then  
+        -- tạo block giả  
+        local block = Instance.new("Part")  
+        block.Size = Vector3.new(6,1,6)  
+        block.Anchored = false  
+        block.CanCollide = false -- không va chạm part khác  
+        block.Transparency = 1 -- ẩn block  
+        block.Parent = workspace  
+        block.CFrame = hrp.CFrame - Vector3.new(0,3,0)  
 
-            -- weld block với nhân vật
-            local weld = Instance.new("WeldConstraint")
-            weld.Part0 = block
-            weld.Part1 = hrp
-            weld.Parent = block
+        -- weld block với nhân vật  
+        local weld = Instance.new("WeldConstraint")  
+        weld.Part0 = block  
+        weld.Part1 = hrp  
+        weld.Parent = block  
 
-            -- bodyvelocity đẩy block lên
-            local bv = Instance.new("BodyVelocity")
-            bv.MaxForce = Vector3.new(0, math.huge, 0)
-            bv.Velocity = Vector3.new(0,65,0) -- bay lên 75 studs/s
-            bv.Parent = block
+        -- bodyvelocity đẩy block lên  
+        local bv = Instance.new("BodyVelocity")  
+        bv.MaxForce = Vector3.new(0, math.huge, 0)  
+        bv.Velocity = Vector3.new(0,65,0) -- bay lên 75 studs/s  
+        bv.Parent = block  
 
-            -- xoá block nhanh (0.1s)
-            game:GetService("Debris"):AddItem(block,0.1)
-        end
-    end
+        -- xoá block nhanh (0.1s)  
+        game:GetService("Debris"):AddItem(block,0.1)  
+    end  
+end  
 
-    subButton("🔼 Throw Up", 140, function()
-        throwUp()
-    end)
+subButton("🔼 Throw Up", 140, function()  
+    throwUp()  
+end)
+
 end)
 -- =========================
 -- NÚT 1: Float + ESP (MCJ.lua)
 -- =========================
 makeButton("Float + ESP", function()
-	loadstring([[-- MCJ.lua
+loadstring([[-- MCJ.lua
 -- MCJ Hub: Galaxy UI + Full ESP (Box/Outline/Body/Name/Studs/Line) + Small Float GUI (1 button)
 -- Place as LocalScript in StarterPlayerScripts (client-side)
 
@@ -195,34 +196,34 @@ local UI_FONT = Enum.Font.GothamBold
 local DEFAULT_ESP_COLOR = Color3.fromRGB(0, 200, 255)
 
 local function safeDestroy(obj)
-    if obj and obj.Parent then
-        pcall(function() obj:Destroy() end)
-    end
+if obj and obj.Parent then
+pcall(function() obj:Destroy() end)
+end
 end
 
 local function makeCorner(parent, radius)
-    local c = Instance.new("UICorner", parent)
-    c.CornerRadius = UDim.new(0, radius or 8)
-    return c
+local c = Instance.new("UICorner", parent)
+c.CornerRadius = UDim.new(0, radius or 8)
+return c
 end
 
 local function makeStroke(parent, thickness, color)
-    local s = Instance.new("UIStroke", parent)
-    s.Thickness = thickness or 1.2
-    s.Color = color or Color3.new(1,1,1)
-    s.Transparency = 0.35
-    return s
+local s = Instance.new("UIStroke", parent)
+s.Thickness = thickness or 1.2
+s.Color = color or Color3.new(1,1,1)
+s.Transparency = 0.35
+return s
 end
 
 local function applyGalaxyGradient(parent)
-    local g = Instance.new("UIGradient", parent)
-    g.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 64, 255)),
-        ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 80, 200)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 170, 255)),
-    }
-    g.Rotation = 45
-    return g
+local g = Instance.new("UIGradient", parent)
+g.Color = ColorSequence.new{
+ColorSequenceKeypoint.new(0, Color3.fromRGB(120, 64, 255)),
+ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 80, 200)),
+ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 170, 255)),
+}
+g.Rotation = 45
+return g
 end
 
 -- ScreenGui
@@ -319,37 +320,38 @@ listLayout.Padding = UDim.new(0,8)
 listLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    leftCol.CanvasSize = UDim2.new(0,0,0,listLayout.AbsoluteContentSize.Y + 12)
+leftCol.CanvasSize = UDim2.new(0,0,0,listLayout.AbsoluteContentSize.Y + 12)
 end)
 
 -- Helper to create toggle rows inside leftCol
 local function createToggleRow(parent, labelText, startOn)
-    local container = Instance.new("Frame", parent)
-    container.Size = UDim2.new(1, -10, 0, 44)
-    container.BackgroundTransparency = 1
+local container = Instance.new("Frame", parent)
+container.Size = UDim2.new(1, -10, 0, 44)
+container.BackgroundTransparency = 1
 
-    local lbl = Instance.new("TextLabel", container)
-    lbl.Size = UDim2.new(0.68,0,1,0)
-    lbl.Position = UDim2.new(0,0,0,0)
-    lbl.BackgroundTransparency = 1
-    lbl.Font = UI_FONT
-    lbl.Text = labelText
-    lbl.TextColor3 = Color3.fromRGB(240,240,245)
-    lbl.TextSize = 16
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
+local lbl = Instance.new("TextLabel", container)  
+lbl.Size = UDim2.new(0.68,0,1,0)  
+lbl.Position = UDim2.new(0,0,0,0)  
+lbl.BackgroundTransparency = 1  
+lbl.Font = UI_FONT  
+lbl.Text = labelText  
+lbl.TextColor3 = Color3.fromRGB(240,240,245)  
+lbl.TextSize = 16  
+lbl.TextXAlignment = Enum.TextXAlignment.Left  
 
-    local btn = Instance.new("TextButton", container)
-    btn.Size = UDim2.new(0.32, -6, 0, 34)
-    btn.Position = UDim2.new(0.68, 6, 0, 5)
-    btn.Font = UI_FONT
-    btn.TextSize = 14
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    makeCorner(btn,8)
-    makeStroke(btn,1,Color3.fromRGB(255,255,255))
-    btn.BackgroundColor3 = startOn and Color3.fromRGB(20,170,100) or Color3.fromRGB(120,30,50)
-    btn.Text = startOn and "ON" or "OFF"
+local btn = Instance.new("TextButton", container)  
+btn.Size = UDim2.new(0.32, -6, 0, 34)  
+btn.Position = UDim2.new(0.68, 6, 0, 5)  
+btn.Font = UI_FONT  
+btn.TextSize = 14  
+btn.TextColor3 = Color3.fromRGB(255,255,255)  
+makeCorner(btn,8)  
+makeStroke(btn,1,Color3.fromRGB(255,255,255))  
+btn.BackgroundColor3 = startOn and Color3.fromRGB(20,170,100) or Color3.fromRGB(120,30,50)  
+btn.Text = startOn and "ON" or "OFF"  
 
-    return lbl, btn, container
+return lbl, btn, container
+
 end
 
 -- Create toggles
@@ -387,13 +389,13 @@ makeStroke(floatToggleBtn,1,Color3.fromRGB(255,255,255))
 
 -- SETTINGS & storage
 local SETTINGS = {
-    Master = false,
-    Box = false,
-    Outline = false,
-    Body = false,
-    Name = false,
-    Studs = false,
-    Line = false,
+Master = false,
+Box = false,
+Outline = false,
+Body = false,
+Name = false,
+Studs = false,
+Line = false,
 }
 local ESP_COLOR = DEFAULT_ESP_COLOR
 local visuals = {} -- visuals[player] = table of created objects
@@ -401,239 +403,240 @@ local localAttach = nil
 
 -- create/destroy local head attachment for beams
 local function ensureLocalAttach()
-    if localAttach and localAttach.Parent and localAttach.Parent:IsDescendantOf(LocalPlayer.Character or workspace) then
-        return localAttach
-    end
-    safeDestroy(localAttach)
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head") then
-        localAttach = Instance.new("Attachment")
-        localAttach.Name = "MCJ_LocalAttach"
-        localAttach.Parent = LocalPlayer.Character.Head
-    end
-    return localAttach
+if localAttach and localAttach.Parent and localAttach.Parent:IsDescendantOf(LocalPlayer.Character or workspace) then
+return localAttach
+end
+safeDestroy(localAttach)
+if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head") then
+localAttach = Instance.new("Attachment")
+localAttach.Name = "MCJ_LocalAttach"
+localAttach.Parent = LocalPlayer.Character.Head
+end
+return localAttach
 end
 
 -- create visuals for a player according to SETTINGS
 local function createVisualsFor(plr)
-    if not plr or not plr.Character or not plr.Character.Parent then return end
-    local char = plr.Character
-    local hrp = char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso")
-    if not hrp then return end
+if not plr or not plr.Character or not plr.Character.Parent then return end
+local char = plr.Character
+local hrp = char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso")
+if not hrp then return end
 
-    local v = visuals[plr]
-    if not v then v = {}; visuals[plr] = v end
+local v = visuals[plr]  
+if not v then v = {}; visuals[plr] = v end  
 
-    -- SelectionBox (Box)
-    if SETTINGS.Master and SETTINGS.Box then
-        if not v.selectionBox then
-            local sb = Instance.new("SelectionBox")
-            sb.Name = "MCJ_SelectionBox"
-            sb.Adornee = hrp
-            sb.LineThickness = 0.02
-            sb.SurfaceTransparency = 1
-            sb.Parent = hrp
-            v.selectionBox = sb
-        else
-            v.selectionBox.Adornee = hrp
-        end
-        if v.selectionBox then v.selectionBox.Color3 = ESP_COLOR end
-    else
-        if v.selectionBox then safeDestroy(v.selectionBox); v.selectionBox = nil end
-    end
+-- SelectionBox (Box)  
+if SETTINGS.Master and SETTINGS.Box then  
+    if not v.selectionBox then  
+        local sb = Instance.new("SelectionBox")  
+        sb.Name = "MCJ_SelectionBox"  
+        sb.Adornee = hrp  
+        sb.LineThickness = 0.02  
+        sb.SurfaceTransparency = 1  
+        sb.Parent = hrp  
+        v.selectionBox = sb  
+    else  
+        v.selectionBox.Adornee = hrp  
+    end  
+    if v.selectionBox then v.selectionBox.Color3 = ESP_COLOR end  
+else  
+    if v.selectionBox then safeDestroy(v.selectionBox); v.selectionBox = nil end  
+end  
 
-    -- Highlight (Outline + Body)
-    if SETTINGS.Master and (SETTINGS.Outline or SETTINGS.Body) then
-        if not v.highlight then
-            local hl = Instance.new("Highlight")
-            hl.Name = "MCJ_Highlight"
-            hl.Adornee = char
-            hl.Parent = workspace
-            v.highlight = hl
-        end
-        if v.highlight then
-            v.highlight.OutlineColor = ESP_COLOR
-            v.highlight.FillColor = ESP_COLOR
-            v.highlight.OutlineTransparency = SETTINGS.Outline and 0 or 1
-            v.highlight.FillTransparency = SETTINGS.Body and 0.6 or 1
-        end
-    else
-        if v.highlight then safeDestroy(v.highlight); v.highlight = nil end
-    end
+-- Highlight (Outline + Body)  
+if SETTINGS.Master and (SETTINGS.Outline or SETTINGS.Body) then  
+    if not v.highlight then  
+        local hl = Instance.new("Highlight")  
+        hl.Name = "MCJ_Highlight"  
+        hl.Adornee = char  
+        hl.Parent = workspace  
+        v.highlight = hl  
+    end  
+    if v.highlight then  
+        v.highlight.OutlineColor = ESP_COLOR  
+        v.highlight.FillColor = ESP_COLOR  
+        v.highlight.OutlineTransparency = SETTINGS.Outline and 0 or 1  
+        v.highlight.FillTransparency = SETTINGS.Body and 0.6 or 1  
+    end  
+else  
+    if v.highlight then safeDestroy(v.highlight); v.highlight = nil end  
+end  
 
-    -- Billboard (Name + Studs)
-    if SETTINGS.Master and (SETTINGS.Name or SETTINGS.Studs) then
-        if not v.billboard then
-            local bb = Instance.new("BillboardGui")
-            bb.Name = "MCJ_Billboard"
-            bb.Adornee = hrp
-            bb.Size = UDim2.new(0,180,0,40)
-            bb.StudsOffset = Vector3.new(0,2.6,0)
-            bb.AlwaysOnTop = true
-            bb.Parent = screenGui
+-- Billboard (Name + Studs)  
+if SETTINGS.Master and (SETTINGS.Name or SETTINGS.Studs) then  
+    if not v.billboard then  
+        local bb = Instance.new("BillboardGui")  
+        bb.Name = "MCJ_Billboard"  
+        bb.Adornee = hrp  
+        bb.Size = UDim2.new(0,180,0,40)  
+        bb.StudsOffset = Vector3.new(0,2.6,0)  
+        bb.AlwaysOnTop = true  
+        bb.Parent = screenGui  
 
-            local nameLab = Instance.new("TextLabel", bb)
-            nameLab.Name = "MCJ_Name"
-            nameLab.Size = UDim2.new(1,0,0.55,0)
-            nameLab.BackgroundTransparency = 1
-            nameLab.Font = UI_FONT
-            nameLab.TextSize = 16
-            nameLab.TextColor3 = ESP_COLOR
-            nameLab.TextStrokeTransparency = 0.8
+        local nameLab = Instance.new("TextLabel", bb)  
+        nameLab.Name = "MCJ_Name"  
+        nameLab.Size = UDim2.new(1,0,0.55,0)  
+        nameLab.BackgroundTransparency = 1  
+        nameLab.Font = UI_FONT  
+        nameLab.TextSize = 16  
+        nameLab.TextColor3 = ESP_COLOR  
+        nameLab.TextStrokeTransparency = 0.8  
 
-            local distLab = Instance.new("TextLabel", bb)
-            distLab.Name = "MCJ_Dist"
-            distLab.Size = UDim2.new(1,0,0.45,0)
-            distLab.Position = UDim2.new(0,0,0.55,0)
-            distLab.BackgroundTransparency = 1
-            distLab.Font = UI_FONT
-            distLab.TextSize = 14
-            distLab.TextColor3 = ESP_COLOR
-            distLab.TextStrokeTransparency = 0.8
+        local distLab = Instance.new("TextLabel", bb)  
+        distLab.Name = "MCJ_Dist"  
+        distLab.Size = UDim2.new(1,0,0.45,0)  
+        distLab.Position = UDim2.new(0,0,0.55,0)  
+        distLab.BackgroundTransparency = 1  
+        distLab.Font = UI_FONT  
+        distLab.TextSize = 14  
+        distLab.TextColor3 = ESP_COLOR  
+        distLab.TextStrokeTransparency = 0.8  
 
-            v.billboard = bb
-            v.nameLab = nameLab
-            v.distLab = distLab
-        end
-        if v.billboard then
-            v.billboard.Adornee = hrp
-            v.nameLab.Text = SETTINGS.Name and plr.Name or ""
-        end
-    else
-        if v.billboard then safeDestroy(v.billboard); v.billboard=nil; v.nameLab=nil; v.distLab=nil end
-    end
+        v.billboard = bb  
+        v.nameLab = nameLab  
+        v.distLab = distLab  
+    end  
+    if v.billboard then  
+        v.billboard.Adornee = hrp  
+        v.nameLab.Text = SETTINGS.Name and plr.Name or ""  
+    end  
+else  
+    if v.billboard then safeDestroy(v.billboard); v.billboard=nil; v.nameLab=nil; v.distLab=nil end  
+end  
 
-    -- Beam (Line) from local head -> target hrp
-    if SETTINGS.Master and SETTINGS.Line and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head") then
-        ensureLocalAttach()
-        if localAttach then
-            if not v.attach1 then
-                local a1 = Instance.new("Attachment")
-                a1.Name = "MCJ_Attach_"..plr.Name
-                a1.Parent = hrp
-                v.attach1 = a1
-            end
-            if not v.beam then
-                local beam = Instance.new("Beam")
-                beam.Name = "MCJ_Beam"
-                beam.Attachment0 = localAttach
-                beam.Attachment1 = v.attach1
-                beam.FaceCamera = true
-                beam.LightEmission = 0.9
-                beam.Width0 = 0.06
-                beam.Width1 = 0.06
-                beam.Color = ColorSequence.new(ESP_COLOR)
-                beam.Parent = workspace
-                v.beam = beam
-            else
-                v.beam.Attachment0 = localAttach
-                if v.beam then v.beam.Color = ColorSequence.new(ESP_COLOR) end
-            end
-        end
-    else
-        if v.beam then safeDestroy(v.beam); v.beam=nil end
-        if v.attach1 then safeDestroy(v.attach1); v.attach1=nil end
-    end
+-- Beam (Line) from local head -> target hrp  
+if SETTINGS.Master and SETTINGS.Line and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head") then  
+    ensureLocalAttach()  
+    if localAttach then  
+        if not v.attach1 then  
+            local a1 = Instance.new("Attachment")  
+            a1.Name = "MCJ_Attach_"..plr.Name  
+            a1.Parent = hrp  
+            v.attach1 = a1  
+        end  
+        if not v.beam then  
+            local beam = Instance.new("Beam")  
+            beam.Name = "MCJ_Beam"  
+            beam.Attachment0 = localAttach  
+            beam.Attachment1 = v.attach1  
+            beam.FaceCamera = true  
+            beam.LightEmission = 0.9  
+            beam.Width0 = 0.06  
+            beam.Width1 = 0.06  
+            beam.Color = ColorSequence.new(ESP_COLOR)  
+            beam.Parent = workspace  
+            v.beam = beam  
+        else  
+            v.beam.Attachment0 = localAttach  
+            if v.beam then v.beam.Color = ColorSequence.new(ESP_COLOR) end  
+        end  
+    end  
+else  
+    if v.beam then safeDestroy(v.beam); v.beam=nil end  
+    if v.attach1 then safeDestroy(v.attach1); v.attach1=nil end  
+end
+
 end
 
 local function removeVisualsFor(plr)
-    local v = visuals[plr]
-    if not v then return end
-    if v.selectionBox then safeDestroy(v.selectionBox) end
-    if v.highlight then safeDestroy(v.highlight) end
-    if v.billboard then safeDestroy(v.billboard) end
-    if v.beam then safeDestroy(v.beam) end
-    if v.attach1 then safeDestroy(v.attach1) end
-    visuals[plr] = nil
+local v = visuals[plr]
+if not v then return end
+if v.selectionBox then safeDestroy(v.selectionBox) end
+if v.highlight then safeDestroy(v.highlight) end
+if v.billboard then safeDestroy(v.billboard) end
+if v.beam then safeDestroy(v.beam) end
+if v.attach1 then safeDestroy(v.attach1) end
+visuals[plr] = nil
 end
 
 -- Update all players visuals (called when toggles change)
 local function updateAllPlayers()
-    -- remove visuals for players that left
-    for pl,_ in pairs(visuals) do
-        if not Players:FindFirstChild(pl.Name) then
-            removeVisualsFor(pl)
-        end
-    end
-    if not SETTINGS.Master then
-        -- remove everything if master off
-        for pl,_ in pairs(visuals) do
-            removeVisualsFor(pl)
-        end
-        return
-    end
-    for _,plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer then
-            if plr.Character and plr.Character.Parent and (plr.Character:FindFirstChild("HumanoidRootPart") or plr.Character:FindFirstChild("Torso")) then
-                createVisualsFor(plr)
-            else
-                removeVisualsFor(plr)
-            end
-        end
-    end
+-- remove visuals for players that left
+for pl,_ in pairs(visuals) do
+if not Players:FindFirstChild(pl.Name) then
+removeVisualsFor(pl)
+end
+end
+if not SETTINGS.Master then
+-- remove everything if master off
+for pl,_ in pairs(visuals) do
+removeVisualsFor(pl)
+end
+return
+end
+for _,plr in ipairs(Players:GetPlayers()) do
+if plr ~= LocalPlayer then
+if plr.Character and plr.Character.Parent and (plr.Character:FindFirstChild("HumanoidRootPart") or plr.Character:FindFirstChild("Torso")) then
+createVisualsFor(plr)
+else
+removeVisualsFor(plr)
+end
+end
+end
 end
 
 -- Continuous update (distance labels, beam color)
 RunService.RenderStepped:Connect(function()
-    if SETTINGS.Master then
-        for plr,v in pairs(visuals) do
-            if plr and v and plr.Character and plr.Character.Parent and plr.Character:FindFirstChild("HumanoidRootPart") then
-                local hrp = plr.Character:FindFirstChild("HumanoidRootPart") or plr.Character:FindFirstChild("Torso")
-                -- studs distance
-                if v.distLab and SETTINGS.Studs and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    local mypos = LocalPlayer.Character.HumanoidRootPart.Position
-                    local theirpos = hrp.Position
-                    v.distLab.Text = string.format("%.1f studs", (mypos - theirpos).Magnitude)
-                elseif v.distLab then
-                    v.distLab.Text = ""
-                end
-                -- beam color update
-                if v.beam then
-                    v.beam.Color = ColorSequence.new(ESP_COLOR)
-                    if (not v.attach1) or (not v.attach1.Parent) then
-                        safeDestroy(v.beam); v.beam=nil
-                        if v.attach1 then safeDestroy(v.attach1); v.attach1=nil end
-                    end
-                end
-            end
-        end
-    end
+if SETTINGS.Master then
+for plr,v in pairs(visuals) do
+if plr and v and plr.Character and plr.Character.Parent and plr.Character:FindFirstChild("HumanoidRootPart") then
+local hrp = plr.Character:FindFirstChild("HumanoidRootPart") or plr.Character:FindFirstChild("Torso")
+-- studs distance
+if v.distLab and SETTINGS.Studs and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+local mypos = LocalPlayer.Character.HumanoidRootPart.Position
+local theirpos = hrp.Position
+v.distLab.Text = string.format("%.1f studs", (mypos - theirpos).Magnitude)
+elseif v.distLab then
+v.distLab.Text = ""
+end
+-- beam color update
+if v.beam then
+v.beam.Color = ColorSequence.new(ESP_COLOR)
+if (not v.attach1) or (not v.attach1.Parent) then
+safeDestroy(v.beam); v.beam=nil
+if v.attach1 then safeDestroy(v.attach1); v.attach1=nil end
+end
+end
+end
+end
+end
 end)
 
 -- Player join/leave handlers
 Players.PlayerRemoving:Connect(function(plr)
-    removeVisualsFor(plr)
+removeVisualsFor(plr)
 end)
 Players.PlayerAdded:Connect(function(plr)
-    plr.CharacterAdded:Connect(function()
-        task.wait(0.25)
-        if SETTINGS.Master then createVisualsFor(plr) end
-    end)
+plr.CharacterAdded:Connect(function()
+task.wait(0.25)
+if SETTINGS.Master then createVisualsFor(plr) end
+end)
 end)
 
 -- UI toggle wiring (change btn UI and SETTINGS, then update visuals)
 local function setToggleUI(btn, state)
-    btn.BackgroundColor3 = state and Color3.fromRGB(20,170,100) or Color3.fromRGB(120,30,50)
-    btn.Text = state and "ON" or "OFF"
+btn.BackgroundColor3 = state and Color3.fromRGB(20,170,100) or Color3.fromRGB(120,30,50)
+btn.Text = state and "ON" or "OFF"
 end
 
 -- Helper to wire toggles
 local function wireToggle(btn, settingKey, extra)
-    btn.MouseButton1Click:Connect(function()
-        SETTINGS[settingKey] = not SETTINGS[settingKey]
-        setToggleUI(btn, SETTINGS[settingKey])
-        -- if master toggled off -> remove visuals
-        if settingKey == "Master" then
-            if not SETTINGS.Master then
-                -- remove all visuals
-                for pl,_ in pairs(visuals) do removeVisualsFor(pl) end
-            end
-        end
-        -- special cases
-        if settingKey == "Line" and SETTINGS.Line then
-            ensureLocalAttach()
-        end
-        updateAllPlayers()
-    end)
+btn.MouseButton1Click:Connect(function()
+SETTINGS[settingKey] = not SETTINGS[settingKey]
+setToggleUI(btn, SETTINGS[settingKey])
+-- if master toggled off -> remove visuals
+if settingKey == "Master" then
+if not SETTINGS.Master then
+-- remove all visuals
+for pl,_ in pairs(visuals) do removeVisualsFor(pl) end
+end
+end
+-- special cases
+if settingKey == "Line" and SETTINGS.Line then
+ensureLocalAttach()
+end
+updateAllPlayers()
+end)
 end
 
 wireToggle(masterBtn, "Master")
@@ -646,8 +649,8 @@ wireToggle(lineBtn, "Line")
 
 -- Float toggle opens small popup
 floatBtn.MouseButton1Click:Connect(function()
-    floatGui.Visible = not floatGui.Visible
-    setToggleUI(floatBtn, floatGui.Visible)
+floatGui.Visible = not floatGui.Visible
+setToggleUI(floatBtn, floatGui.Visible)
 end)
 
 -- Float implementation (small popup button handles enabling float)
@@ -657,241 +660,330 @@ local floatConn = nil
 local FLOAT_HEIGHT = 3
 
 local function enableFloat()
-    if floatActive then return end
-    floatActive = true
-    if not floatPart then
-        floatPart = Instance.new("Part")
-        floatPart.Name = "MCJ_FloatPart"
-        floatPart.Size = Vector3.new(6,1,6)
-        floatPart.Anchored = true
-        floatPart.CanCollide = true
-        floatPart.Transparency = 0.45
-        floatPart.Parent = workspace
-    end
-    if floatConn then floatConn:Disconnect() end
-    floatConn = RunService.RenderStepped:Connect(function()
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") and floatPart then
-            floatPart.Position = char.HumanoidRootPart.Position - Vector3.new(0, FLOAT_HEIGHT, 0)
-        end
-    end)
+if floatActive then return end
+floatActive = true
+if not floatPart then
+floatPart = Instance.new("Part")
+floatPart.Name = "MCJ_FloatPart"
+floatPart.Size = Vector3.new(6,1,6)
+floatPart.Anchored = true
+floatPart.CanCollide = true
+floatPart.Transparency = 0.45
+floatPart.Parent = workspace
+end
+if floatConn then floatConn:Disconnect() end
+floatConn = RunService.RenderStepped:Connect(function()
+local char = LocalPlayer.Character
+if char and char:FindFirstChild("HumanoidRootPart") and floatPart then
+floatPart.Position = char.HumanoidRootPart.Position - Vector3.new(0, FLOAT_HEIGHT, 0)
+end
+end)
 end
 
 local function disableFloat()
-    if floatConn then
-        pcall(function() floatConn:Disconnect() end)
-        floatConn = nil
-    end
-    if floatPart then safeDestroy(floatPart); floatPart = nil end
-    floatActive = false
+if floatConn then
+pcall(function() floatConn:Disconnect() end)
+floatConn = nil
+end
+if floatPart then safeDestroy(floatPart); floatPart = nil end
+floatActive = false
 end
 
 floatToggleBtn.MouseButton1Click:Connect(function()
-    if not floatActive then
-        enableFloat()
-        floatToggleBtn.Text = "Float: ON"
-        floatToggleBtn.BackgroundColor3 = Color3.fromRGB(20,170,100)
-    else
-        disableFloat()
-        floatToggleBtn.Text = "Float: OFF"
-        floatToggleBtn.BackgroundColor3 = Color3.fromRGB(110,16,60)
-    end
+if not floatActive then
+enableFloat()
+floatToggleBtn.Text = "Float: ON"
+floatToggleBtn.BackgroundColor3 = Color3.fromRGB(20,170,100)
+else
+disableFloat()
+floatToggleBtn.Text = "Float: OFF"
+floatToggleBtn.BackgroundColor3 = Color3.fromRGB(110,16,60)
+end
 end)
 
 -- Toggle float popup with F
 UserInputService.InputBegan:Connect(function(input, processed)
-    if processed then return end
-    if input.KeyCode == Enum.KeyCode.F then
-        floatGui.Visible = not floatGui.Visible
-        setToggleUI(floatBtn, floatGui.Visible)
-    end
+if processed then return end
+if input.KeyCode == Enum.KeyCode.F then
+floatGui.Visible = not floatGui.Visible
+setToggleUI(floatBtn, floatGui.Visible)
+end
 end)
 
 -- Dragging panel (header)
 do
-    local dragging, dragInput, dragStart, startPos
-    header.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = panel.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-    header.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and input == dragInput then
-            local delta = input.Position - dragStart
-            panel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
+local dragging, dragInput, dragStart, startPos
+header.InputBegan:Connect(function(input)
+if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+dragging = true
+dragStart = input.Position
+startPos = panel.Position
+input.Changed:Connect(function()
+if input.UserInputState == Enum.UserInputState.End then
+dragging = false
+end
+end)
+end
+end)
+header.InputChanged:Connect(function(input)
+if input.UserInputType == Enum.UserInputType.MouseMovement then
+dragInput = input
+end
+end)
+UserInputService.InputChanged:Connect(function(input)
+if dragging and input == dragInput then
+local delta = input.Position - dragStart
+panel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+end)
 end
 
 -- Open/close UI
 openBtn.MouseButton1Click:Connect(function()
-    panel.Visible = true
-    openBtn.Visible = false
+panel.Visible = true
+openBtn.Visible = false
 end)
 closeBtn.MouseButton1Click:Connect(function()
-    panel.Visible = false
-    openBtn.Visible = true
+panel.Visible = false
+openBtn.Visible = true
 end)
 
 -- Cleanup on respawn
 LocalPlayer.CharacterRemoving:Connect(function()
-    if localAttach then safeDestroy(localAttach); localAttach = nil end
-    for pl,_ in pairs(visuals) do removeVisualsFor(pl) end
-    disableFloat()
+if localAttach then safeDestroy(localAttach); localAttach = nil end
+for pl,_ in pairs(visuals) do removeVisualsFor(pl) end
+disableFloat()
 end)
 
 -- Initialize visuals for existing players if master on
 for _,plr in ipairs(Players:GetPlayers()) do
-    if plr ~= LocalPlayer then
-        -- ensure we create visuals only when toggled on
-        plr.CharacterAdded:Connect(function()
-            task.wait(0.25)
-            if SETTINGS.Master then createVisualsFor(plr) end
-        end)
-    end
+if plr ~= LocalPlayer then
+-- ensure we create visuals only when toggled on
+plr.CharacterAdded:Connect(function()
+task.wait(0.25)
+if SETTINGS.Master then createVisualsFor(plr) end
+end)
+end
 end
 
 -- Final ready message
 print("[MCJ] Loaded: Full ESP + Float (Scroll support).")
 
 openBtn.Position = UDim2.new(0,18,0.48,-180)
-		print("[MCJ] ESP + Float executed.")
-	]])()
+print("[MCJ] ESP + Float executed.")
+]])()
 end)
 
 -- =========================
 -- NÚT 2: Float VIP
 -- =========================
 makeButton("Float VIP", function()
-	loadstring([[local Players = game:GetService("Players")
-		local RunService = game:GetService("RunService")
+loadstring([[local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
-		local player = Players.LocalPlayer
-		local char = player.Character or player.CharacterAdded:Wait()
-		local hrp = char:WaitForChild("HumanoidRootPart")
-		local humanoid = char:WaitForChild("Humanoid")
+local player = Players.LocalPlayer  
+	local char = player.Character or player.CharacterAdded:Wait()  
+	local hrp = char:WaitForChild("HumanoidRootPart")  
+	local humanoid = char:WaitForChild("Humanoid")  
 
-		local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-		gui.Name = "FloatNewlGui"
-		gui.ResetOnSpawn = false
+	local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))  
+	gui.Name = "FloatNewlGui"  
+	gui.ResetOnSpawn = false  
 
-		local btn = Instance.new("TextButton", gui)
-		btn.Size = UDim2.new(0,200,0,50)
-		btn.Position = UDim2.new(0.05,0,0.2,0)
-		btn.BackgroundColor3 = Color3.fromRGB(20,20,20)
-		btn.TextColor3 = Color3.fromRGB(0,255,150)
-		btn.Text = "MCJ FLOAT"
-		btn.Font = Enum.Font.GothamBold
-		btn.TextSize = 22
-		btn.Active = true
-		btn.Draggable = true
-		Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
+	local btn = Instance.new("TextButton", gui)  
+	btn.Size = UDim2.new(0,200,0,50)  
+	btn.Position = UDim2.new(0.05,0,0.2,0)  
+	btn.BackgroundColor3 = Color3.fromRGB(20,20,20)  
+	btn.TextColor3 = Color3.fromRGB(0,255,150)  
+	btn.Text = "MCJ FLOAT"  
+	btn.Font = Enum.Font.GothamBold  
+	btn.TextSize = 22  
+	btn.Active = true  
+	btn.Draggable = true  
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)  
 
-		local enabled = false
-		local block
-		local moveConn
-		local floatConn
+	local enabled = false  
+	local block  
+	local moveConn  
+	local floatConn  
 
-		local function enableWalk()
-			if enabled then return end
-			enabled = true
-			btn.Text = "Float ON"
+	local function enableWalk()  
+		if enabled then return end  
+		enabled = true  
+		btn.Text = "Float ON"  
 
-			humanoid.JumpPower = 0  
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)  
+		humanoid.JumpPower = 0    
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)    
 
-			block = Instance.new("Part")  
-			block.Size = Vector3.new(10000,1,10000)  
-			block.Anchored = true  
-			block.CanCollide = true  
-			block.Transparency = 1  
-			block.Position = Vector3.new(hrp.Position.X, hrp.Position.Y - 3, hrp.Position.Z)  
-			block.Parent = workspace  
+		block = Instance.new("Part")    
+		block.Size = Vector3.new(10000,1,10000)    
+		block.Anchored = true    
+		block.CanCollide = true    
+		block.Transparency = 1    
+		block.Position = Vector3.new(hrp.Position.X, hrp.Position.Y - 3, hrp.Position.Z)    
+		block.Parent = workspace    
 
-			moveConn = RunService.RenderStepped:Connect(function()  
-				local cam = workspace.CurrentCamera  
-				local look = cam.CFrame.LookVector  
-				local dir = Vector3.new(look.X, 0, look.Z).Unit  
-				humanoid:Move(dir, false)  
-			end)  
+		moveConn = RunService.RenderStepped:Connect(function()    
+			local cam = workspace.CurrentCamera    
+			local look = cam.CFrame.LookVector    
+			local dir = Vector3.new(look.X, 0, look.Z).Unit    
+			humanoid:Move(dir, false)    
+		end)    
 
-			floatConn = RunService.Heartbeat:Connect(function(dt)  
-				if block and block.Parent then  
-					block.Position = block.Position - Vector3.new(0, 1 * dt, 0)  
-				end  
-			end)
-		end
+		floatConn = RunService.Heartbeat:Connect(function(dt)    
+			if block and block.Parent then    
+				block.Position = block.Position - Vector3.new(0, 1 * dt, 0)    
+			end    
+		end)  
+	end  
 
-		local function disableWalk()
-			enabled = false
-			btn.Text = "Float OFF"
-			humanoid.JumpPower = 50  
-			humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)  
-			if moveConn then moveConn:Disconnect() end  
-			if floatConn then floatConn:Disconnect() end  
-			if block then block:Destroy() end
-		end
+	local function disableWalk()  
+		enabled = false  
+		btn.Text = "Float OFF"  
+		humanoid.JumpPower = 50    
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, true)    
+		if moveConn then moveConn:Disconnect() end    
+		if floatConn then floatConn:Disconnect() end    
+		if block then block:Destroy() end  
+	end  
 
-		btn.MouseButton1Click:Connect(function()
-			if enabled then disableWalk() else enableWalk() end
-		end)
+	btn.MouseButton1Click:Connect(function()  
+		if enabled then disableWalk() else enableWalk() end  
+	end)  
 
-		player.CharacterAdded:Connect(function(c)
-			char = c
-			hrp = c:WaitForChild("HumanoidRootPart")
-			humanoid = c:WaitForChild("Humanoid")
-		end)
-		print("[MCJ] Float VIP executed.")
-		-- Float VIP script ở đây
-		print("[MCJ] Float VIP executed.")
-	]])()
+	player.CharacterAdded:Connect(function(c)  
+		char = c  
+		hrp = c:WaitForChild("HumanoidRootPart")  
+		humanoid = c:WaitForChild("Humanoid")  
+	end)  
+	print("[MCJ] Float VIP executed.")  
+	-- Float VIP script ở đây  
+	print("[MCJ] Float VIP executed.")  
+]])()
+
 end)
 
+-- =========================
+-- NÚT 15: Steal Floor 3
+-- =========================
+local stealGui
+local stealBlock
+
+makeButton("Steal Floor 3", function()
+    if stealGui and stealGui.Parent then
+        stealGui:Destroy()
+        stealGui = nil
+        return
+    end
+
+    stealGui = Instance.new("ScreenGui", player.PlayerGui)
+    stealGui.Name = "StealFloor3Gui"
+    stealGui.ResetOnSpawn = false
+
+    local frame = Instance.new("Frame", stealGui)
+    frame.Size = UDim2.new(0, 220, 0, 140)
+    frame.Position = UDim2.new(0.65, 0, 0.35, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    frame.Active = true
+    frame.Draggable = true
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+
+    local title = Instance.new("TextLabel", frame)
+    title.Size = UDim2.new(1, 0, 0, 30)
+    title.Text = "Steal Floor 3"
+    title.Font = Enum.Font.GothamBold
+    title.TextColor3 = Color3.fromRGB(255, 200, 50)
+    title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    title.TextSize = 18
+    Instance.new("UICorner", title).CornerRadius = UDim.new(0, 6)
+
+    local function subButton(text, y, callback)
+        local btn = Instance.new("TextButton", frame)
+        btn.Size = UDim2.new(0, 200, 0, 40)
+        btn.Position = UDim2.new(0, 10, 0, y)
+        btn.Text = text
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = 16
+        btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        btn.TextColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+        btn.MouseButton1Click:Connect(callback)
+        return btn
+    end
+
+    -- 🔼 Steal
+    subButton("🔼 Steal", 40, function()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if hrp and not stealBlock then
+            stealBlock = Instance.new("Part")
+            stealBlock.Size = Vector3.new(100,1,100)
+            stealBlock.Anchored = true
+            stealBlock.Position = hrp.Position - Vector3.new(0,3,0)
+            stealBlock.Color = Color3.fromRGB(255, 100, 0)
+            stealBlock.Material = Enum.Material.Neon
+            stealBlock.Parent = workspace
+
+            -- Tween block đi lên 10 studs
+            local TweenService = game:GetService("TweenService")
+            local goal = {}
+            goal.Position = Vector3.new(hrp.Position.X, hrp.Position.Y + 10, hrp.Position.Z)
+            local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
+            local tween = TweenService:Create(stealBlock, tweenInfo, goal)
+            tween:Play()
+
+            -- Làm toàn bộ Part trong suốt 0.7
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                if obj:IsA("BasePart") and obj ~= stealBlock then
+                    obj.Transparency = 0.7
+                end
+            end
+        end
+    end)
+
+    -- ❌ Delete Block
+    subButton("❌ Delete Block", 90, function()
+        if stealBlock then
+            stealBlock:Destroy()
+            stealBlock = nil
+        end
+        -- KHÔNG còn teleport nhân vật nữa
+        -- Transparency giữ nguyên 0.7 (không reset)
+    end)
+end)
 -- =========================
 -- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
 makeButton("FLOAT Gui", function()
-	loadstring(game:HttpGet("https://pastefy.app/YkHHDqR2/raw"))()
+loadstring(game:HttpGet("https://pastefy.app/YkHHDqR2/raw"))()
 end)
 
 -- =========================
 -- NÚT 4: KurdHub
 -- =========================
 makeButton("KurdHub", function()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/Ninja10908/S4/refs/heads/main/Kurdhub"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Ninja10908/S4/refs/heads/main/Kurdhub"))()
 end)
 
 -- =========================
 -- NÚT 5: Lonnon
 -- =========================
 makeButton("Lonnon", function()
-	loadstring(game:HttpGet("https://pastefy.app/MJw2J4T6/raw"))()
+loadstring(game:HttpGet("https://pastefy.app/MJw2J4T6/raw"))()
 end)
 
 -- =========================
 -- NÚT 6: Delfi
 -- =========================
 makeButton("Delfi", function()
-	loadstring(game:HttpGet("https://pastefy.app/UTq45GC2/raw"))()
+loadstring(game:HttpGet("https://pastefy.app/UTq45GC2/raw"))()
 end)
 
 -- =========================
 -- NÚT 7: Chilli Hub
 -- =========================
 makeButton("Chilli Hub", function()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
 end)
 
 -- =========================
@@ -909,68 +1001,70 @@ toggleBtn.TextSize = 16
 Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0,8)
 
 toggleBtn.MouseButton1Click:Connect(function()
-	frame.Visible = not frame.Visible
-	toggleBtn.Text = frame.Visible and "Hide GUI" or "Show GUI"
+frame.Visible = not frame.Visible
+toggleBtn.Text = frame.Visible and "Hide GUI" or "Show GUI"
 end)
 
 -- =========================
 -- NÚT 8: Maranda
 -- =========================
 makeButton("Maranda", function()
-    loadstring(game:HttpGet("https://pastefy.app/JJVhs3rK/raw"))()
+loadstring(game:HttpGet("https://pastefy.app/JJVhs3rK/raw"))()
 end)
 
 -- =========================
 -- NÚT 9: Anti Kick
 -- =========================
 makeButton("Anti Kick", function()
-    -- Ngăn chặn việc bị kick (hook Kick/Destroy)
-    local mt = getrawmetatable(game)
-    local oldNamecall = mt.__namecall
-    setreadonly(mt, false)
+-- Ngăn chặn việc bị kick (hook Kick/Destroy)
+local mt = getrawmetatable(game)
+local oldNamecall = mt.__namecall
+setreadonly(mt, false)
 
-    mt.__namecall = newcclosure(function(self, ...)
-        local method = getnamecallmethod()
-        if method == "Kick" or method == "kick" then
-            warn("[MCJ] Anti Kick chặn Kick!")
-            return nil
-        end
-        return oldNamecall(self, ...)
-    end)
+mt.__namecall = newcclosure(function(self, ...)  
+    local method = getnamecallmethod()  
+    if method == "Kick" or method == "kick" then  
+        warn("[MCJ] Anti Kick chặn Kick!")  
+        return nil  
+    end  
+    return oldNamecall(self, ...)  
+end)  
 
-    setreadonly(mt, true)
-    print("[MCJ] Anti Kick đã bật.")
+setreadonly(mt, true)  
+print("[MCJ] Anti Kick đã bật.")
+
 end)
 
 -- =========================
 -- NÚT 10: Kick Button
 -- =========================
 makeButton("Kick Button", function()
-    local player = game.Players.LocalPlayer
-    local gui = player:WaitForChild("PlayerGui")
+local player = game.Players.LocalPlayer
+local gui = player:WaitForChild("PlayerGui")
 
-    -- nếu GUI ẩn chưa tồn tại thì tạo
-    local kickGui = gui:FindFirstChild("MCJ_KickGui")
-    if not kickGui then
-        kickGui = Instance.new("ScreenGui", gui)
-        kickGui.Name = "MCJ_KickGui"
-        kickGui.Enabled = false
+-- nếu GUI ẩn chưa tồn tại thì tạo  
+local kickGui = gui:FindFirstChild("MCJ_KickGui")  
+if not kickGui then  
+    kickGui = Instance.new("ScreenGui", gui)  
+    kickGui.Name = "MCJ_KickGui"  
+    kickGui.Enabled = false  
 
-        local btn = Instance.new("TextButton", kickGui)
-        btn.Size = UDim2.new(0,200,0,50)
-        btn.Position = UDim2.new(0.5,-100,0.5,-200)
-        btn.Text = "Kick Me"
-        btn.TextSize = 20
-        btn.BackgroundColor3 = Color3.fromRGB(200,50,50)
-        btn.TextColor3 = Color3.new(1,1,1)
+    local btn = Instance.new("TextButton", kickGui)  
+    btn.Size = UDim2.new(0,200,0,50)  
+    btn.Position = UDim2.new(0.5,-100,0.5,-200)  
+    btn.Text = "Kick Me"  
+    btn.TextSize = 20  
+    btn.BackgroundColor3 = Color3.fromRGB(200,50,50)  
+    btn.TextColor3 = Color3.new(1,1,1)  
 
-        btn.MouseButton1Click:Connect(function()
-            player:Kick("Ngon thí.")
-        end)
-    end
+    btn.MouseButton1Click:Connect(function()  
+        player:Kick("Ngon thí.")  
+    end)  
+end  
 
-    -- Bật/tắt gui
-    kickGui.Enabled = not kickGui.Enabled
+-- Bật/tắt gui  
+kickGui.Enabled = not kickGui.Enabled
+
 end)
 
 -- 🟢 NÚT 13: Copy @mcjreal (luôn ở đầu)
@@ -984,28 +1078,28 @@ copyBtn.Text = "MY TIKTOK"
 Instance.new("UICorner", copyBtn).CornerRadius = UDim.new(0,10)
 
 -- Đặt nó luôn đầu tiên
-copyBtn.LayoutOrder = -999  
+copyBtn.LayoutOrder = -999
 
 copyBtn.MouseButton1Click:Connect(function()
-    if setclipboard then
-        setclipboard("@mcjreal")  -- Executor hỗ trợ setclipboard
-        print("[MCJ] Đã copy @mcjreal vào clipboard.")
-    else
-        warn("[MCJ] Executor không hỗ trợ setclipboard!")
-    end
+if setclipboard then
+setclipboard("@mcjreal")  -- Executor hỗ trợ setclipboard
+print("[MCJ] Đã copy @mcjreal vào clipboard.")
+else
+warn("[MCJ] Executor không hỗ trợ setclipboard!")
+end
 end)
 
 -- =========================
 -- NÚT 12: Load Vietnam Hub
 -- =========================
 makeButton("🇻🇳 Load Vietnam Hub", function()
-    local success, err = pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/replit8173/VietnamHub/refs/heads/main/VietnamseHub.lua", true))()
-    end)
-    if not success then
-        warn("[MCJ] Lỗi khi load Vietnam Hub:", err)
-    end 
-end) 
+local success, err = pcall(function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/replit8173/VietnamHub/refs/heads/main/VietnamseHub.lua", true))()
+end)
+if not success then
+warn("[MCJ] Lỗi khi load Vietnam Hub:", err)
+end
+end)
 
 -- 🟣 CỤM INFINITE YIELD (luôn nằm cuối scroll)
 local infiniteFrame = Instance.new("Frame", scroll)
@@ -1035,5 +1129,6 @@ infiniteBtn.Text = "▶️ Execute Infinite Yield"
 Instance.new("UICorner", infiniteBtn).CornerRadius = UDim.new(0,10)
 
 infiniteBtn.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 end)
+
