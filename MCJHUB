@@ -917,7 +917,7 @@ makeButton("Steal Floor 3", function()
         local hrp = char:FindFirstChild("HumanoidRootPart")
         if hrp and not stealBlock then
             stealBlock = Instance.new("Part")
-            stealBlock.Size = Vector3.new(100,1,100)
+            stealBlock.Size = Vector3.new(10000,1,10000)
             stealBlock.Anchored = true
             stealBlock.Transparency = 0.6 -- block tàng hình
             stealBlock.Position = hrp.Position - Vector3.new(0,3,0)
@@ -928,7 +928,7 @@ makeButton("Steal Floor 3", function()
             -- Tween block đi lên 10 studs
             local TweenService = game:GetService("TweenService")
             local goal = {}
-            goal.Position = Vector3.new(hrp.Position.X, hrp.Position.Y + 20, hrp.Position.Z)
+            goal.Position = Vector3.new(hrp.Position.X, hrp.Position.Y + 15, hrp.Position.Z)
             local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
             local tween = TweenService:Create(stealBlock, tweenInfo, goal)
             tween:Play()
