@@ -1083,7 +1083,7 @@ copyBtn.BackgroundColor3 = Color3.fromRGB(70,20,70)
 copyBtn.TextColor3 = Color3.fromRGB(255,255,0)
 copyBtn.Font = Enum.Font.GothamBold
 copyBtn.TextSize = 18
-copyBtn.Text = "MY TIKTOK"
+copyBtn.Text = "MY TIKTOK @mcjreal"
 Instance.new("UICorner", copyBtn).CornerRadius = UDim.new(0,10)
 
 -- Đặt nó luôn đầu tiên
