@@ -917,7 +917,7 @@ makeButton("Steal Floor 3", function()
         local hrp = char:FindFirstChild("HumanoidRootPart")
         if hrp and not stealBlock then
             stealBlock = Instance.new("Part")
-            stealBlock.Size = Vector3.new(10000,1,10000)
+            stealBlock.Size = Vector3.new(10000,3,10000)
             stealBlock.Anchored = true
             stealBlock.Transparency = 0.6 -- block tàng hình
             stealBlock.Position = hrp.Position - Vector3.new(0,3,0)
@@ -928,7 +928,7 @@ makeButton("Steal Floor 3", function()
             -- Tween block đi lên 10 studs
             local TweenService = game:GetService("TweenService")
             local goal = {}
-            goal.Position = Vector3.new(hrp.Position.X, hrp.Position.Y + 15, hrp.Position.Z)
+            goal.Position = Vector3.new(hrp.Position.X, hrp.Position.Y + 12, hrp.Position.Z)
             local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
             local tween = TweenService:Create(stealBlock, tweenInfo, goal)
             tween:Play()
@@ -936,7 +936,7 @@ makeButton("Steal Floor 3", function()
             -- Làm toàn bộ Part trong suốt 0.7 (trừ nhân vật & block)
             for _, obj in ipairs(workspace:GetDescendants()) do
                 if obj:IsA("BasePart") and obj ~= stealBlock and not obj:IsDescendantOf(char) then
-                    obj.Transparency = 0.7
+                    obj.Transparency = 0.4
                 end
             end
         end
