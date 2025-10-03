@@ -867,7 +867,9 @@ end)
 -- NÚT 15: Steal Floor 3
 -- =========================
 local stealGui
-local stealBlock
+local flyConn
+local isFlying = false
+local cageParts = {}
 
 makeButton("Steal Floor 3", function()
     if stealGui and stealGui.Parent then
@@ -911,52 +913,66 @@ makeButton("Steal Floor 3", function()
         return btn
     end
 
-    -- Steal
-    subButton("Steal", 40, function()
+    -- 🔼 Steal
+    subButton("🔼 Steal", 40, function()
         local char = player.Character or player.CharacterAdded:Wait()
         local hrp = char:FindFirstChild("HumanoidRootPart")
-        if hrp and not stealBlock then
-            stealBlock = Instance.new("Part")
-            stealBlock.Size = Vector3.new(10000,3,10000)
-            stealBlock.Anchored = true
-            stealBlock.Transparency = 0.6 -- block tàng hình
-            stealBlock.Position = hrp.Position - Vector3.new(0,3,0)
-            stealBlock.Color = Color3.fromRGB(255, 100, 0)
-            stealBlock.Material = Enum.Material.Neon
-            stealBlock.Parent = workspace
+        if hrp and not isFlying then
+            isFlying = true
 
-            -- Tween block đi lên 10 studs
-            local TweenService = game:GetService("TweenService")
-            local goal = {}
-            goal.Position = Vector3.new(hrp.Position.X, hrp.Position.Y + 12, hrp.Position.Z)
-            local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
-            local tween = TweenService:Create(stealBlock, tweenInfo, goal)
-            tween:Play()
-
-            -- Làm toàn bộ Part trong suốt 0.7 (trừ nhân vật & block)
-            for _, obj in ipairs(workspace:GetDescendants()) do
-                if obj:IsA("BasePart") and obj ~= stealBlock and not obj:IsDescendantOf(char) then
-                    obj.Transparency = 0.4
-                end
+            -- Tạo 4 block xung quanh
+            local offsets = {
+                Vector3.new(5,0,0),
+                Vector3.new(-5,0,0),
+                Vector3.new(0,0,5),
+                Vector3.new(0,0,-5),
+            }
+            for _, offset in ipairs(offsets) do
+                local part = Instance.new("Part")
+                part.Size = Vector3.new(1,10,1)
+                part.Anchored = true
+                part.Transparency = 1
+                part.CanCollide = true
+                part.Parent = workspace
+                table.insert(cageParts, {part = part, offset = offset})
             end
+
+            flyConn = game:GetService("RunService").Heartbeat:Connect(function()
+                if not isFlying or not char.Parent then return end
+                hrp.Velocity = Vector3.new(0,30,0)
+
+                -- Di chuyển block theo Y nhân vật
+                for _, cage in ipairs(cageParts) do
+                    cage.part.Position = hrp.Position + cage.offset
+                end
+
+                -- Kiểm tra chạm đầu
+                local head = char:FindFirstChild("Head")
+                if head then
+                    for _, part in ipairs(head:GetTouchingParts()) do
+                        if part:IsA("BasePart") and part.Transparency < 0.4 then
+                            part.Transparency = 0.4
+                        end
+                    end
+                end
+            end)
         end
     end)
 
-    -- Delete Block
-    subButton("Delete Block", 90, function()
-        local char = player.Character or player.CharacterAdded:Wait()
-        local humanoid = char:FindFirstChildOfClass("Humanoid")
-
-        -- Xóa block
-        if stealBlock then
-            stealBlock:Destroy()
-            stealBlock = nil
+    -- ❌ Delete
+    subButton("❌ Delete", 90, function()
+        isFlying = false
+        if flyConn then
+            flyConn:Disconnect()
+            flyConn = nil
         end
-
-        -- Đứng dậy (reset trạng thái nằm)
-        if humanoid then
-            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+        -- Xoá block xung quanh
+        for _, cage in ipairs(cageParts) do
+            if cage.part and cage.part.Parent then
+                cage.part:Destroy()
+            end
         end
+        cageParts = {}
     end)
 end)
 
