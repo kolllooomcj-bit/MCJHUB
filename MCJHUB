@@ -1188,4 +1188,108 @@ Instance.new("UICorner", infiniteBtn).CornerRadius = UDim.new(0,10)
 infiniteBtn.MouseButton1Click:Connect(function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 end)
+-- =========================
+-- NÚT 14: Pet Finder VIP
+-- =========================
+makeButton("🐾 Pet Finder VIP", function()
+    local player = game.Players.LocalPlayer
+    local gui = player:WaitForChild("PlayerGui")
 
+    -- Nếu GUI đã tồn tại, không tạo lại
+    if gui:FindFirstChild("PetFinderGuiVIP") then
+        return
+    end
+
+    -- =========================
+    -- Tạo GUI
+    -- =========================
+    local codeGui = Instance.new("ScreenGui", gui)
+    codeGui.Name = "PetFinderGuiVIP"
+    codeGui.ResetOnSpawn = false
+
+    local frame = Instance.new("Frame", codeGui)
+    frame.Size = UDim2.new(0, 320, 0, 180)
+    frame.Position = UDim2.new(0.5, -160, 0.5, -90)
+    frame.BackgroundColor3 = Color3.fromRGB(20,20,25)
+    frame.Active = true
+    frame.Draggable = true
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0,14)
+
+    -- Effect VIP gradient
+    local gradient = Instance.new("UIGradient", frame)
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255,0,200)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,255,150)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0,150,255))
+    }
+    gradient.Rotation = 45
+
+    -- Title
+    local title = Instance.new("TextLabel", frame)
+    title.Size = UDim2.new(1,0,0,40)
+    title.Position = UDim2.new(0,0,0,0)
+    title.BackgroundTransparency = 1
+    title.Text = "🐾 Pet Finder VIP"
+    title.TextColor3 = Color3.fromRGB(255,255,0)
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 20
+
+    -- Close button
+    local closeBtn = Instance.new("TextButton", frame)
+    closeBtn.Size = UDim2.new(0,30,0,30)
+    closeBtn.Position = UDim2.new(1,-35,0,5)
+    closeBtn.Text = "X"
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 18
+    closeBtn.TextColor3 = Color3.fromRGB(255,50,50)
+    closeBtn.BackgroundTransparency = 0.3
+    closeBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0,6)
+
+    closeBtn.MouseButton1Click:Connect(function()
+        codeGui:Destroy()
+    end)
+
+    -- TextBox nhập code
+    local textBox = Instance.new("TextBox", frame)
+    textBox.Size = UDim2.new(0.8, 0, 0, 40)
+    textBox.Position = UDim2.new(0.1,0,0.35,0)
+    textBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    textBox.TextColor3 = Color3.fromRGB(255,255,255)
+    textBox.Font = Enum.Font.Gotham
+    textBox.TextSize = 16
+    textBox.PlaceholderText = "Enter VIP code..."
+    Instance.new("UICorner", textBox).CornerRadius = UDim.new(0,8)
+
+    -- Submit button
+    local submitBtn = Instance.new("TextButton", frame)
+    submitBtn.Size = UDim2.new(0.5, 0, 0, 40)
+    submitBtn.Position = UDim2.new(0.25, 0, 0.7, 0)
+    submitBtn.Text = "Submit"
+    submitBtn.Font = Enum.Font.GothamBold
+    submitBtn.TextSize = 16
+    submitBtn.TextColor3 = Color3.fromRGB(0,0,0)
+    submitBtn.BackgroundColor3 = Color3.fromRGB(0,255,150)
+    Instance.new("UICorner", submitBtn).CornerRadius = UDim.new(0,8)
+
+    -- Hiệu ứng khi hover (VIP neon glow)
+    submitBtn.MouseEnter:Connect(function()
+        submitBtn.BackgroundColor3 = Color3.fromRGB(255,200,0)
+    end)
+    submitBtn.MouseLeave:Connect(function()
+        submitBtn.BackgroundColor3 = Color3.fromRGB(0,255,150)
+    end)
+
+    -- Xử lý submit
+    submitBtn.MouseButton1Click:Connect(function()
+        local code = textBox.Text
+        if code == "Mcjrealcode24h90192983091" then
+            -- chạy loadstring khi đúng code
+            loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/083f208b2d5d19c6b565190b0d2293c9.lua"))()
+            codeGui:Destroy() -- đóng GUI
+        else
+            textBox.Text = ""
+            textBox.PlaceholderText = "Wrong code!"
+        end
+    end)
+end)
