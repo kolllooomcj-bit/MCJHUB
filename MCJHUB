@@ -54,11 +54,18 @@ btn.MouseButton1Click:Connect(callback)
 end
 
 -- =========================
+-- NÚT 3: FLOAT Gui (Pastefy)
+-- =========================
+makeButton("FLOAT Gui", function()
+loadstring(game:HttpGet("https://pastefy.app/P2CWBaHF/raw"))()
+end)
+
+-- =========================
 -- NÚT 11: JumpBoost + MegaBlock + ThrowUp Sub-GUI
 -- =========================
 local subGui
 
-makeButton("⚡ Jump + Block Menu", function()
+makeButton("Jump + Block Menu", function()
 if subGui and subGui.Parent then
 subGui:Destroy()
 subGui = nil
