@@ -1,0 +1,64 @@
+-- 🌈 MCJ Neon Aura X Rotation v5
+-- 💫 2 vòng hình cầu, full rainbow sync, cực mượt
+-- 🌀 Tự động xoay quanh người, không ánh sáng
+-- 👑 by MCJ THEREAL 💫
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+-- ⚙️ Cấu hình
+local numParts = 24
+local radius = 4
+local size = 0.45
+local transparency = 0.25
+local speed = 2.2
+local colorSpeed = 1.5
+
+-- 🌈 Hàm tạo màu cầu vồng đồng bộ
+local function rainbowColor(t)
+	local r = math.sin(t * colorSpeed) * 127 + 128
+	local g = math.sin(t * colorSpeed + 2) * 127 + 128
+	local b = math.sin(t * colorSpeed + 4) * 127 + 128
+	return Color3.fromRGB(r, g, b)
+end
+
+-- 🧩 Tạo part hình cầu (không ánh sáng)
+local function createSphere()
+	local sphere = Instance.new("Part")
+	sphere.Shape = Enum.PartType.Ball
+	sphere.Size = Vector3.new(size, size, size)
+	sphere.Anchored = true
+	sphere.CanCollide = false
+	sphere.Material = Enum.Material.Neon
+	sphere.Transparency = transparency
+	sphere.Parent = workspace
+	return sphere
+end
+
+-- 🌟 Tạo aura tự động
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
+
+local parts = {}
+for i = 1, numParts do
+	parts[i] = createSphere()
+end
+
+local angle = 0
+RunService.RenderStepped:Connect(function(dt)
+	angle += dt * speed
+	local color = rainbowColor(tick())
+
+	for i, part in ipairs(parts) do
+		local offset = (i / numParts) * math.pi * 2
+
+		part.Color = color
+
+		-- Vòng xoay 3D quanh HRP
+		local x = math.cos(angle + offset) * radius
+		local y = math.sin(angle * 1.3 + offset) * radius * 0.7
+		local z = math.sin(angle + offset) * radius
+		part.CFrame = CFrame.new(hrp.Position) * CFrame.new(x, y, z)
+	end
+end)
