@@ -1,0 +1,54 @@
+-- 🌈 MCJ MINI HUD v5
+-- 📊 FPS | Ping | Game | Rainbow chữ mượt
+-- 🚀 Luôn đè lên mọi GUI khác
+-- 👑 by MCJ THEREAL
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+local MarketplaceService = game:GetService("MarketplaceService")
+local player = Players.LocalPlayer
+
+-- 🖥️ GUI chính (top layer)
+local gui = Instance.new("ScreenGui")
+gui.Name = "MCJ_MiniHUD"
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+gui.DisplayOrder = 999999999 -- 🔥 luôn nằm trên cùng
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- 💬 Label chữ
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(0, 360, 0, 25)
+label.Position = UDim2.new(0, 10, 0, 55)
+label.BackgroundTransparency = 1
+label.TextColor3 = Color3.new(1, 1, 1)
+label.TextScaled = true
+label.Font = Enum.Font.GothamBold
+label.TextXAlignment = Enum.TextXAlignment.Left
+label.ZIndex = 999999999
+label.Text = "⚡ FPS ... | 📡 Ping ... | 🎮 Game ..."
+label.Parent = gui
+
+-- 🌈 Rainbow mượt
+local function rainbow(t)
+	return Color3.fromHSV((t * 0.25) % 1, 1, 1)
+end
+
+-- ⚙️ Cập nhật dữ liệu
+local lastUpdate = 0
+RunService.RenderStepped:Connect(function(dt)
+	lastUpdate += dt
+	if lastUpdate >= 0.25 then
+		lastUpdate = 0
+		local fps = math.floor(1 / dt)
+		local ping = Stats.Network.ServerStatsItem["Data Ping"]:GetValueString() or "?"
+		local gameName = "Unknown"
+		pcall(function()
+			gameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
+		end)
+		label.Text = string.format("⚡ %d FPS | 📡 %s | 🎮 %s", fps, ping, gameName)
+	end
+	label.TextColor3 = rainbow(tick())
+end)
