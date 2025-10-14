@@ -1,8 +1,21 @@
 zombie = game:GetService("RunService").Stepped:Connect(function ()
-game.Players.LocalPlayer.Character.Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=782841498"
-game.Players.LocalPlayer.Character.Animate.idle.Animation2.AnimationId = "http://www.roblox.com/asset/?id=782841498"
-game.Players.LocalPlayer.Character.Animate.run.RunAnim.AnimationId = "http://www.roblox.com/asset/?id=616163682"
-game.Players.LocalPlayer.Character.Animate.jump.JumpAnim.AnimationId = "http://www.roblox.com/asset/?id=10921351278"
-game.Players.LocalPlayer.Character.Animate.fall.FallAnim.AnimationId = "http://www.roblox.com/asset/?id=10921350320"
-game.Players.LocalPlayer.Character.Animate.climb.ClimbAnim.AnimationId = "http://www.roblox.com/asset/?id=10921343576"
+    local char = game.Players.LocalPlayer.Character
+    if not char or not char:FindFirstChild("Animate") then return end
+
+    -- 💤 Idle
+    char.Animate.idle.Animation1.AnimationId = "http://www.roblox.com/asset/?id=782841498"
+    char.Animate.idle.Animation2.AnimationId = "http://www.roblox.com/asset/?id=10921232093"
+
+    -- 🏃 Walk & Run
+    char.Animate.walk.WalkAnim.AnimationId = "http://www.roblox.com/asset/?id=10921244891"
+    char.Animate.run.RunAnim.AnimationId = "http://www.roblox.com/asset/?id=10921240218"
+
+    -- 🦘 Jump & Fall (Adidas Fall)
+    char.Animate.jump.JumpAnim.AnimationId = "http://www.roblox.com/asset/?id=10921242013"
+    char.Animate.fall.FallAnim.AnimationId = "http://www.roblox.com/asset/?id=98600215928904"
+
+    -- 🧗 Climb & Swim
+    char.Animate.climb.ClimbAnim.AnimationId = "http://www.roblox.com/asset/?id=10921229866"
+    char.Animate.swim.SwimIdleAnim.AnimationId = "http://www.roblox.com/asset/?id=10921244018"
+    char.Animate.swim.SwimAnim.AnimationId = "http://www.roblox.com/asset/?id=10921243048"
 end)
