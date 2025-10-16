@@ -1,0 +1,97 @@
+-- ✈️ MCJ Vehicle Fly Auto (Camera Direction + Auto Speed)
+-- By ChatGPT & MCJ THEREAL 😎
+
+local plr = game.Players.LocalPlayer
+local rs = game:GetService("RunService")
+
+-- 🧭 GUI Setup
+local gui = Instance.new("ScreenGui")
+gui.Name = "MCJVehicleFly"
+gui.IgnoreGuiInset = true
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+gui.Parent = plr:WaitForChild("PlayerGui")
+
+local button = Instance.new("TextButton", gui)
+button.Size = UDim2.new(0, 120, 0, 40)
+button.Position = UDim2.new(0, 0, 0, 70)
+button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+button.BackgroundTransparency = 0.4
+button.TextColor3 = Color3.new(1, 1, 1)
+button.Font = Enum.Font.GothamBold
+button.TextSize = 18
+button.Text = "MCJFly: OFF"
+button.BorderSizePixel = 0
+button.AutoButtonColor = false
+button.ZIndex = 9999
+
+local UICorner = Instance.new("UICorner", button)
+UICorner.CornerRadius = UDim.new(0, 12)
+
+-- ⚙️ Variables
+local flying = false
+local bv, bg
+local humanoid
+local root
+
+-- 🔄 Function: Update references when respawn
+local function updateCharacter()
+	local char = plr.Character or plr.CharacterAdded:Wait()
+	root = char:WaitForChild("HumanoidRootPart")
+	humanoid = char:WaitForChild("Humanoid")
+end
+
+updateCharacter()
+plr.CharacterAdded:Connect(function()
+	task.wait(1)
+	updateCharacter()
+end)
+
+-- 🛫 Start/Stop Fly
+local function toggleFly()
+	flying = not flying
+	if flying then
+		button.Text = "MCJFly: ON"
+		button.BackgroundColor3 = Color3.fromRGB(50, 200, 255)
+
+		bv = Instance.new("BodyVelocity")
+		bv.MaxForce = Vector3.new(400000, 400000, 400000)
+		bv.Velocity = Vector3.zero
+		bv.P = 10000
+		bv.Parent = root
+
+		bg = Instance.new("BodyGyro")
+		bg.MaxTorque = Vector3.new(400000, 400000, 400000)
+		bg.P = 3000
+		bg.CFrame = root.CFrame
+		bg.Parent = root
+
+		rs:BindToRenderStep("MCJFlyAuto", Enum.RenderPriority.Input.Value, function()
+			if not root or not humanoid then return end
+			local cam = workspace.CurrentCamera
+			local look = cam.CFrame.LookVector
+			local speed = humanoid.WalkSpeed -- 🔥 tự động theo tốc độ nhân vật
+			bg.CFrame = CFrame.new(root.Position, root.Position + look)
+			bv.Velocity = look * speed
+		end)
+	else
+		button.Text = "MCJFly: OFF"
+		button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+		rs:UnbindFromRenderStep("MCJFlyAuto")
+		if bv then bv:Destroy() end
+		if bg then bg:Destroy() end
+	end
+end
+
+button.MouseButton1Click:Connect(toggleFly)
+
+-- 🌈 Rainbow Effect
+task.spawn(function()
+	local hue = 0
+	while task.wait(0.05) do
+		if flying then
+			hue = (hue + 0.01) % 1
+			button.BackgroundColor3 = Color3.fromHSV(hue, 0.8, 1)
+		end
+	end
+end)
