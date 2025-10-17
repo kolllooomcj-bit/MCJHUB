@@ -56,13 +56,6 @@ end
 -- =========================
 -- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
-makeButton("Op fly", function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/kolllooomcj-bit/MCJHUB/refs/heads/main/Op%20fly"))()
-end)
-
--- =========================
--- NÚT 3: FLOAT Gui (Pastefy)
--- =========================
 makeButton("SKYWALK", function()
 loadstring(game:HttpGet("https://pastefy.app/P2CWBaHF/raw"))()
 end)
