@@ -3,11 +3,9 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local hrp = char:WaitForChild("HumanoidRootPart")
 local playerGui = player:WaitForChild("PlayerGui")
 
--- 🧩 GUI setup
+-- 🧩 GUI setup (tạo 1 lần duy nhất)
 local gui = Instance.new("ScreenGui", playerGui)
 gui.Name = "MCJ_FLY"
 gui.ResetOnSpawn = false
@@ -40,45 +38,66 @@ circle.Position = UDim2.new(0, 2, 0, 2)
 circle.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
 
--- ⚙️ Trạng thái
+-- ⚙️ Biến toàn cục
 local active = false
 local connection
+local hrp
 
--- ✈️ Fly function
+-- 🚀 Hàm bắt đầu fly
 local function FreeFly()
 	local speed = 20
 	local cam = workspace.CurrentCamera
 
+	if connection then connection:Disconnect() end
 	connection = RunService.Heartbeat:Connect(function()
-		if not active then
+		if not active or not hrp or not hrp.Parent then
 			if connection then connection:Disconnect() end
-			hrp.Velocity = Vector3.zero
+			if hrp then hrp.Velocity = Vector3.zero end
 			return
 		end
 
-		local camCFrame = cam.CFrame
-		local moveDir = camCFrame.LookVector
-
-		-- Nếu camera hướng lên => bay lên, hướng xuống => bay xuống
+		local moveDir = cam.CFrame.LookVector
 		local moveVector = moveDir * speed
 		hrp.Velocity = moveVector
 	end)
 end
 
--- 🎛 Toggle control
+-- 🎮 Toggle on/off
+local function SetToggle(state)
+	active = state
+
+	if active then
+		TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
+		TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1,-23,0,2), BackgroundColor3 = Color3.fromRGB(255,255,255)}):Play()
+		FreeFly()
+	else
+		if connection then connection:Disconnect() end
+		if hrp then hrp.Velocity = Vector3.zero end
+		TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
+		TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0,2,0,2), BackgroundColor3 = Color3.fromRGB(200,0,0)}):Play()
+	end
+end
+
+-- 🎛 Nhấn nút để bật/tắt
 toggle.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		active = not active
-
-		if active then
-			TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
-			TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1,-23,0,2), BackgroundColor3 = Color3.fromRGB(255,255,255)}):Play()
-			FreeFly()
-		else
-			if connection then connection:Disconnect() end
-			hrp.Velocity = Vector3.zero
-			TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
-			TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0,2,0,2), BackgroundColor3 = Color3.fromRGB(200,0,0)}):Play()
-		end
+		SetToggle(not active)
 	end
 end)
+
+-- 💀 Khi nhân vật chết hoặc spawn lại → cập nhật hrp mới
+local function SetupCharacter(char)
+	hrp = char:WaitForChild("HumanoidRootPart", 10)
+	if active then
+		FreeFly()
+	end
+end
+
+player.CharacterAdded:Connect(SetupCharacter)
+
+-- Khởi tạo cho lần đầu
+if player.Character then
+	SetupCharacter(player.Character)
+else
+	player.CharacterAdded:Wait()
+end
