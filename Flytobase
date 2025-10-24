@@ -1,0 +1,123 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- GUI setup
+local gui = Instance.new("ScreenGui", playerGui)
+gui.Name = "MCJ_FLYTOBASE"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 180, 0, 70)
+frame.Position = UDim2.new(0.5, -90, 0.25, 0)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 25)
+title.BackgroundTransparency = 1
+title.Text = "MCJ FLY TO BASE"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local toggle = Instance.new("Frame", frame)
+toggle.Size = UDim2.new(0, 60, 0, 25)
+toggle.Position = UDim2.new(0.5, -30, 0.55, 0)
+toggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
+
+local circle = Instance.new("Frame", toggle)
+circle.Size = UDim2.new(0, 21, 0, 21)
+circle.Position = UDim2.new(0, 2, 0, 2)
+circle.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
+
+-- Trạng thái
+local active = false
+local connection
+
+-- Tìm DeliveryHitbox
+local function FindDelivery()
+	local plots = workspace:FindFirstChild("Plots")
+	if not plots then return nil end
+
+	for _, plot in pairs(plots:GetChildren()) do
+		local sign = plot:FindFirstChild("PlotSign")
+		if sign then
+			local yourBase = sign:FindFirstChild("YourBase")
+			if yourBase and yourBase.Enabled then
+				local hitbox = plot:FindFirstChild("DeliveryHitbox")
+				if hitbox then
+					return hitbox
+				end
+			end
+		end
+	end
+	return nil
+end
+
+-- Bay về hitbox (khóa Y)
+local function FlyTo(target)
+	if not target then return end
+	local speed = 20
+	local fixedY = hrp.Position.Y
+
+	connection = RunService.Heartbeat:Connect(function()
+		if not active then
+			if connection then connection:Disconnect() end
+			return
+		end
+
+		if not hrp or not hrp.Parent then return end
+
+		local targetPos = Vector3.new(target.Position.X, fixedY, target.Position.Z)
+		local direction = (targetPos - hrp.Position)
+		local distance = direction.Magnitude
+
+		if distance < 3 then
+			active = false
+			if connection then connection:Disconnect() end
+			hrp.Velocity = Vector3.zero
+			TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
+			TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0,2,0,2), BackgroundColor3 = Color3.fromRGB(200,0,0)}):Play()
+			return
+		end
+
+		local moveVector = direction.Unit * speed
+		hrp.Velocity = Vector3.new(moveVector.X, 0, moveVector.Z)
+	end)
+end
+
+-- Nút bật/tắt
+toggle.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		active = not active
+		if active then
+			TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
+			TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1,-23,0,2), BackgroundColor3 = Color3.fromRGB(255,255,255)}):Play()
+			
+			local hitbox = FindDelivery()
+			if hitbox then
+				FlyTo(hitbox)
+			else
+				warn("❌ Không tìm thấy DeliveryHitbox!")
+				active = false
+				TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
+				TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0,2,0,2), BackgroundColor3 = Color3.fromRGB(200,0,0)}):Play()
+			end
+		else
+			if connection then connection:Disconnect() end
+			hrp.Velocity = Vector3.zero
+			TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
+			TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0,2,0,2), BackgroundColor3 = Color3.fromRGB(200,0,0)}):Play()
+		end
+	end
+end)
