@@ -3,11 +3,9 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local hrp = char:WaitForChild("HumanoidRootPart")
 local playerGui = player:WaitForChild("PlayerGui")
 
--- GUI setup
+-- 🧩 GUI setup (tạo 1 lần duy nhất)
 local gui = Instance.new("ScreenGui", playerGui)
 gui.Name = "MCJ_FLYTOBASE"
 gui.ResetOnSpawn = false
@@ -40,11 +38,12 @@ circle.Position = UDim2.new(0, 2, 0, 2)
 circle.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
 
--- Trạng thái
+-- ⚙️ Trạng thái
 local active = false
 local connection
+local hrp
 
--- Tìm DeliveryHitbox
+-- 🔍 Tìm DeliveryHitbox
 local function FindDelivery()
 	local plots = workspace:FindFirstChild("Plots")
 	if not plots then return nil end
@@ -55,31 +54,29 @@ local function FindDelivery()
 			local yourBase = sign:FindFirstChild("YourBase")
 			if yourBase and yourBase.Enabled then
 				local hitbox = plot:FindFirstChild("DeliveryHitbox")
-				if hitbox then
-					return hitbox
-				end
+				if hitbox then return hitbox end
 			end
 		end
 	end
 	return nil
 end
 
--- Bay về hitbox (khóa Y)
+-- ✈️ Bay về hitbox (khóa Y)
 local function FlyTo(target)
-	if not target then return end
+	if not target or not hrp then return end
+
 	local speed = 20
 	local fixedY = hrp.Position.Y
 
+	if connection then connection:Disconnect() end
 	connection = RunService.Heartbeat:Connect(function()
-		if not active then
+		if not active or not hrp or not hrp.Parent then
 			if connection then connection:Disconnect() end
 			return
 		end
 
-		if not hrp or not hrp.Parent then return end
-
 		local targetPos = Vector3.new(target.Position.X, fixedY, target.Position.Z)
-		local direction = (targetPos - hrp.Position)
+		local direction = targetPos - hrp.Position
 		local distance = direction.Magnitude
 
 		if distance < 3 then
@@ -96,28 +93,51 @@ local function FlyTo(target)
 	end)
 end
 
--- Nút bật/tắt
+-- 🎛 Nút bật/tắt
+local function SetToggle(state)
+	active = state
+
+	if active then
+		TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
+		TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1,-23,0,2), BackgroundColor3 = Color3.fromRGB(255,255,255)}):Play()
+		local hitbox = FindDelivery()
+		if hitbox then
+			FlyTo(hitbox)
+		else
+			warn("❌ Không tìm thấy DeliveryHitbox!")
+			SetToggle(false)
+		end
+	else
+		if connection then connection:Disconnect() end
+		if hrp then hrp.Velocity = Vector3.zero end
+		TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
+		TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0,2,0,2), BackgroundColor3 = Color3.fromRGB(200,0,0)}):Play()
+	end
+end
+
+-- 🖱 Xử lý khi nhấn nút GUI
 toggle.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		active = not active
-		if active then
-			TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
-			TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1,-23,0,2), BackgroundColor3 = Color3.fromRGB(255,255,255)}):Play()
-			
-			local hitbox = FindDelivery()
-			if hitbox then
-				FlyTo(hitbox)
-			else
-				warn("❌ Không tìm thấy DeliveryHitbox!")
-				active = false
-				TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
-				TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0,2,0,2), BackgroundColor3 = Color3.fromRGB(200,0,0)}):Play()
-			end
-		else
-			if connection then connection:Disconnect() end
-			hrp.Velocity = Vector3.zero
-			TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
-			TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0,2,0,2), BackgroundColor3 = Color3.fromRGB(200,0,0)}):Play()
-		end
+		SetToggle(not active)
 	end
 end)
+
+-- 💀 Khi chết/spawn lại
+local function SetupCharacter(char)
+	hrp = char:WaitForChild("HumanoidRootPart", 10)
+	if active then
+		local hitbox = FindDelivery()
+		if hitbox then
+			FlyTo(hitbox)
+		end
+	end
+end
+
+player.CharacterAdded:Connect(SetupCharacter)
+
+-- Khởi tạo lần đầu
+if player.Character then
+	SetupCharacter(player.Character)
+else
+	player.CharacterAdded:Wait()
+end
