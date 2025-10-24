@@ -1,123 +1,84 @@
--- ✈️ MCJ Vehicle Fly v3 — Camera Fly + Sky Block Edition
--- 🧠 By THEREALMCJ
--- 🪶 Bay theo hướng camera + block trong suốt dưới chân
--- 🌈 Giao diện & rainbow như bản MCJ Vehicle Fly v2
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
-local plr = game.Players.LocalPlayer
-local rs = game:GetService("RunService")
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+local playerGui = player:WaitForChild("PlayerGui")
 
--- 🧭 GUI Setup
-local gui = Instance.new("ScreenGui")
-gui.Name = "MCJVehicleFly"
-gui.IgnoreGuiInset = true
+-- 🧩 GUI setup
+local gui = Instance.new("ScreenGui", playerGui)
+gui.Name = "MCJ_FLY"
 gui.ResetOnSpawn = false
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-gui.Parent = plr:WaitForChild("PlayerGui")
 
-local button = Instance.new("TextButton", gui)
-button.Size = UDim2.new(0, 120, 0, 40)
-button.Position = UDim2.new(0, 0, 0, 70)
-button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-button.BackgroundTransparency = 0.4
-button.TextColor3 = Color3.new(1, 1, 1)
-button.Font = Enum.Font.GothamBold
-button.TextSize = 18
-button.Text = "MCJFly: OFF"
-button.BorderSizePixel = 0
-button.AutoButtonColor = false
-button.ZIndex = 9999
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 180, 0, 70)
+frame.Position = UDim2.new(0.5, -90, 0.25, 0)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
-Instance.new("UICorner", button).CornerRadius = UDim.new(0, 12)
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 25)
+title.BackgroundTransparency = 1
+title.Text = "MCJ FLY"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- ⚙️ Variables
-local flying = false
-local bv, bg, baseBlock
-local root
+local toggle = Instance.new("Frame", frame)
+toggle.Size = UDim2.new(0, 60, 0, 25)
+toggle.Position = UDim2.new(0.5, -30, 0.55, 0)
+toggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
 
--- 🧍 Cập nhật nhân vật khi respawn
-local function updateCharacter()
-	local char = plr.Character or plr.CharacterAdded:Wait()
-	root = char:WaitForChild("HumanoidRootPart")
+local circle = Instance.new("Frame", toggle)
+circle.Size = UDim2.new(0, 21, 0, 21)
+circle.Position = UDim2.new(0, 2, 0, 2)
+circle.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
+
+-- ⚙️ Trạng thái
+local active = false
+local connection
+
+-- ✈️ Fly function
+local function FreeFly()
+	local speed = 20
+	local cam = workspace.CurrentCamera
+
+	connection = RunService.Heartbeat:Connect(function()
+		if not active then
+			if connection then connection:Disconnect() end
+			hrp.Velocity = Vector3.zero
+			return
+		end
+
+		local camCFrame = cam.CFrame
+		local moveDir = camCFrame.LookVector
+
+		-- Nếu camera hướng lên => bay lên, hướng xuống => bay xuống
+		local moveVector = moveDir * speed
+		hrp.Velocity = moveVector
+	end)
 end
 
-updateCharacter()
-plr.CharacterAdded:Connect(function()
-	task.wait(1)
-	updateCharacter()
-end)
+-- 🎛 Toggle control
+toggle.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+		active = not active
 
--- 🧱 Tạo block trong suốt dưới chân
-local function createBaseBlock()
-	if baseBlock then baseBlock:Destroy() end
-	baseBlock = Instance.new("Part")
-	baseBlock.Size = Vector3.new(5, 1, 5)
-	baseBlock.Anchored = true
-	baseBlock.CanCollide = false
-	baseBlock.Transparency = 1
-	baseBlock.Material = Enum.Material.ForceField
-	baseBlock.Color = Color3.fromRGB(0, 255, 255)
-	baseBlock.Name = "MCJ_FlyBlock"
-	baseBlock.Parent = workspace
-end
-
--- 🛫 Toggle Fly
-local function toggleFly()
-	flying = not flying
-	if flying then
-		button.Text = "MCJFly: ON"
-		button.BackgroundColor3 = Color3.fromRGB(50, 200, 255)
-
-		createBaseBlock()
-
-		bv = Instance.new("BodyVelocity")
-		bv.MaxForce = Vector3.new(400000, 400000, 400000)
-		bv.Velocity = Vector3.zero
-		bv.P = 10000
-		bv.Parent = root
-
-		bg = Instance.new("BodyGyro")
-		bg.MaxTorque = Vector3.new(400000, 400000, 400000)
-		bg.P = 3000
-		bg.CFrame = root.CFrame
-		bg.Parent = root
-
-		rs:BindToRenderStep("MCJFlyCamera", Enum.RenderPriority.Input.Value, function()
-			if not root then return end
-			local cam = workspace.CurrentCamera
-			local look = cam.CFrame.LookVector
-			local speed = 16
-
-			bg.CFrame = CFrame.new(root.Position, root.Position + look)
-			bv.Velocity = look * speed
-
-			-- 🧱 Cập nhật block dưới chân
-			if baseBlock then
-				baseBlock.CFrame = CFrame.new(root.Position - Vector3.new(0, 3, 0))
-			end
-		end)
-	else
-		button.Text = "MCJFly: OFF"
-		button.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-
-		rs:UnbindFromRenderStep("MCJFlyCamera")
-		if bv then bv:Destroy() end
-		if bg then bg:Destroy() end
-		if baseBlock then baseBlock:Destroy() end
-	end
-end
-
-button.MouseButton1Click:Connect(toggleFly)
-
--- 🌈 Rainbow Button Effect
-task.spawn(function()
-	local hue = 0
-	while task.wait(0.05) do
-		if flying then
-			hue = (hue + 0.01) % 1
-			button.BackgroundColor3 = Color3.fromHSV(hue, 0.8, 1)
-			if baseBlock then
-				baseBlock.Color = Color3.fromHSV(hue, 1, 1)
-			end
+		if active then
+			TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
+			TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1,-23,0,2), BackgroundColor3 = Color3.fromRGB(255,255,255)}):Play()
+			FreeFly()
+		else
+			if connection then connection:Disconnect() end
+			hrp.Velocity = Vector3.zero
+			TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
+			TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0,2,0,2), BackgroundColor3 = Color3.fromRGB(200,0,0)}):Play()
 		end
 	end
 end)
