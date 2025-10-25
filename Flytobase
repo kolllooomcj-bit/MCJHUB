@@ -2,16 +2,15 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local hrp = char:WaitForChild("HumanoidRootPart")
+local backpack = player:WaitForChild("Backpack")
 
 -- 🧩 GUI
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-gui.Name = "MCJ_FlyToBase"
+gui.Name = "MCJ_FlyToBaseGrapple"
 gui.ResetOnSpawn = false
 
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 220, 0, 120)
+main.Size = UDim2.new(0, 200, 0, 100)
 main.Position = UDim2.new(0.5, -110, 0.3, 0)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 main.Active = true
@@ -19,46 +18,62 @@ main.Draggable = true
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 14)
 
 local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1, 0, 0, 35)
+title.Size = UDim2.new(1,0,0,35)
 title.BackgroundTransparency = 1
 title.Text = "🌀 MCJ FLY TO BASE"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 20
-title.TextColor3 = Color3.fromRGB(0, 200, 255)
+title.TextSize = 16
+title.TextColor3 = Color3.fromRGB(0,200,255)
 
+-- Toggle row
 local flyRow = Instance.new("Frame", main)
-flyRow.Size = UDim2.new(1, -20, 0, 40)
-flyRow.Position = UDim2.new(0, 10, 0, 50)
-flyRow.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-Instance.new("UICorner", flyRow).CornerRadius = UDim.new(0, 10)
+flyRow.Size = UDim2.new(1,-20,0,40)
+flyRow.Position = UDim2.new(0,10,0,50)
+flyRow.BackgroundColor3 = Color3.fromRGB(35,35,35)
+Instance.new("UICorner", flyRow).CornerRadius = UDim.new(0,10)
 
 local flyLabel = Instance.new("TextLabel", flyRow)
-flyLabel.Size = UDim2.new(0.7, 0, 1, 0)
+flyLabel.Size = UDim2.new(0.7,0,1,0)
 flyLabel.BackgroundTransparency = 1
-flyLabel.Text = "Fly to Base"
+flyLabel.Text = "Fly to base"
 flyLabel.Font = Enum.Font.GothamSemibold
 flyLabel.TextSize = 16
-flyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyLabel.TextColor3 = Color3.fromRGB(255,255,255)
 flyLabel.TextXAlignment = Enum.TextXAlignment.Left
-flyLabel.Position = UDim2.new(0.05, 0, 0, 0)
+flyLabel.Position = UDim2.new(0.05,0,0,0)
 
 local toggle = Instance.new("Frame", flyRow)
-toggle.Size = UDim2.new(0, 55, 0, 22)
-toggle.Position = UDim2.new(1, -65, 0.5, -11)
-toggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
+toggle.Size = UDim2.new(0,55,0,22)
+toggle.Position = UDim2.new(1,-65,0.5,-11)
+toggle.BackgroundColor3 = Color3.fromRGB(80,80,80)
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(1,0)
 
 local circle = Instance.new("Frame", toggle)
-circle.Size = UDim2.new(0, 20, 0, 20)
-circle.Position = UDim2.new(0, 1, 0, 1)
-circle.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
+circle.Size = UDim2.new(0,20,0,20)
+circle.Position = UDim2.new(0,1,0,1)
+circle.BackgroundColor3 = Color3.fromRGB(200,0,0)
+Instance.new("UICorner", circle).CornerRadius = UDim.new(1,0)
 
--- ⚙️ Logic
+-- ⚙️ Variables
 local flying = false
-local connection
+local loopEquipConn
+local flyConn
+local char, hrp
 
--- 🧭 Tìm base của mình
+-- Lấy character & hrp
+local function getChar()
+    char = player.Character or player.CharacterAdded:Wait()
+    hrp = char:WaitForChild("HumanoidRootPart")
+end
+getChar()
+player.CharacterAdded:Connect(function()
+    flying = false
+    if loopEquipConn then loopEquipConn:Disconnect() loopEquipConn=nil end
+    if flyConn then flyConn:Disconnect() flyConn=nil end
+    getChar()
+end)
+
+-- Find DeliveryHitbox
 local function FindDelivery()
 	local plots = workspace:FindFirstChild("Plots")
 	if not plots then return end
@@ -74,74 +89,72 @@ local function FindDelivery()
 	end
 end
 
--- 🛩️ Fly loop
+-- Fly loop
 local function StartFly()
+	if not hrp then return end
 	local delivery = FindDelivery()
-	if not delivery then
-		warn("⚠️ Không tìm thấy base!")
-		return
-	end
+	if not delivery then return end
 
-	local basePos = delivery.Position
-	local startY = hrp.Position.Y
-	local targetY = startY -- giữ y thay vì rớt nhanh
+	local targetY = hrp.Position.Y
 
-	if connection then connection:Disconnect() end
-	connection = RunService.Heartbeat:Connect(function(dt)
-		if not flying then
-			connection:Disconnect()
-			hrp.Velocity = Vector3.zero
+	if flyConn then flyConn:Disconnect() end
+	flyConn = RunService.Heartbeat:Connect(function(dt)
+		if not flying or not hrp or not hrp.Parent then
+			if flyConn then flyConn:Disconnect() flyConn=nil end
 			return
 		end
 
-		if not hrp or not hrp.Parent then return end
-
-		-- hướng về base (XZ)
 		local rootPos = hrp.Position
+		local basePos = delivery.Position
 		local dir = Vector3.new(basePos.X, rootPos.Y, basePos.Z) - rootPos
 		local distXZ = Vector2.new(dir.X, dir.Z).Magnitude
 		local distY = math.abs(basePos.Y - rootPos.Y)
 
-		-- khi gần base thì dừng lại
-		if distXZ <= 5 and distY <= 100 then
+		if distXZ <= 5 and distY <= 3 then
 			flying = false
 			hrp.Velocity = Vector3.zero
-			TweenService:Create(toggle, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
-			TweenService:Create(circle, TweenInfo.new(0.25), {
-				Position = UDim2.new(0,1,0,1),
-				BackgroundColor3 = Color3.fromRGB(200,0,0)
-			}):Play()
+			TweenService:Create(toggle, TweenInfo.new(0.25), {BackgroundColor3=Color3.fromRGB(80,80,80)}):Play()
+			TweenService:Create(circle, TweenInfo.new(0.25), {Position=UDim2.new(0,1,0,1), BackgroundColor3=Color3.fromRGB(200,0,0)}):Play()
+			if loopEquipConn then loopEquipConn:Disconnect() loopEquipConn=nil end
+			if flyConn then flyConn:Disconnect() flyConn=nil end
 			return
 		end
 
-		-- hạ 1 studs / 5s → 0.2 studs/s
-		targetY -= 0.2 * dt
-		local vel = dir.Unit * 20
-		vel = Vector3.new(vel.X, (targetY - rootPos.Y) * 5, vel.Z)
-
+		-- hạ 0.2 studs/s
+		targetY -= 0.2*dt
+		local vel = dir.Unit*20
+		vel = Vector3.new(vel.X,(targetY-rootPos.Y)*5,vel.Z)
 		hrp.Velocity = vel
 	end)
 end
 
--- 🧲 Toggle
+-- Loop auto equip Grapple Hook
+local function StartLoopEquip()
+	if loopEquipConn then loopEquipConn:Disconnect() loopEquipConn=nil end
+	loopEquipConn = RunService.Heartbeat:Connect(function()
+		if not char then return end
+		local tool = char:FindFirstChild("Grapple Hook") or backpack:FindFirstChild("Grapple Hook")
+		if tool and tool.Parent ~= char then
+			tool.Parent = char
+		end
+	end)
+end
+
+-- Toggle click
 toggle.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+	if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
 		flying = not flying
 		if flying then
-			TweenService:Create(toggle, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
-			TweenService:Create(circle, TweenInfo.new(0.25), {
-				Position = UDim2.new(1,-21,0,1),
-				BackgroundColor3 = Color3.fromRGB(255,255,255)
-			}):Play()
+			TweenService:Create(toggle, TweenInfo.new(0.25), {BackgroundColor3=Color3.fromRGB(0,200,100)}):Play()
+			TweenService:Create(circle, TweenInfo.new(0.25), {Position=UDim2.new(1,-21,0,1), BackgroundColor3=Color3.fromRGB(255,255,255)}):Play()
 			StartFly()
+			StartLoopEquip()
 		else
-			if connection then connection:Disconnect() end
-			hrp.Velocity = Vector3.zero
-			TweenService:Create(toggle, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
-			TweenService:Create(circle, TweenInfo.new(0.25), {
-				Position = UDim2.new(0,1,0,1),
-				BackgroundColor3 = Color3.fromRGB(200,0,0)
-			}):Play()
+			if flyConn then flyConn:Disconnect() flyConn=nil end
+			if loopEquipConn then loopEquipConn:Disconnect() loopEquipConn=nil end
+			if hrp then hrp.Velocity=Vector3.zero end
+			TweenService:Create(toggle, TweenInfo.new(0.25), {BackgroundColor3=Color3.fromRGB(80,80,80)}):Play()
+			TweenService:Create(circle, TweenInfo.new(0.25), {Position=UDim2.new(0,1,0,1), BackgroundColor3=Color3.fromRGB(200,0,0)}):Play()
 		end
 	end
 end)
