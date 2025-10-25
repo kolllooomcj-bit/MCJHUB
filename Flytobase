@@ -1,53 +1,67 @@
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
-
+local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
 
--- 🧩 GUI setup (tạo 1 lần duy nhất)
-local gui = Instance.new("ScreenGui", playerGui)
-gui.Name = "MCJ_FLYTOBASE"
+-- 🧩 GUI
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "MCJ_FlyToBase"
 gui.ResetOnSpawn = false
 
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 180, 0, 70)
-frame.Position = UDim2.new(0.5, -90, 0.25, 0)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.Active = true
-frame.Draggable = true
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 220, 0, 120)
+main.Position = UDim2.new(0.5, -110, 0.3, 0)
+main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+main.Active = true
+main.Draggable = true
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 14)
 
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 25)
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 35)
 title.BackgroundTransparency = 1
-title.Text = "MCJ FLY TO BASE"
+title.Text = "🌀 MCJ FLY TO BASE"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 20
+title.TextColor3 = Color3.fromRGB(0, 200, 255)
 
-local toggle = Instance.new("Frame", frame)
-toggle.Size = UDim2.new(0, 60, 0, 25)
-toggle.Position = UDim2.new(0.5, -30, 0.55, 0)
+local flyRow = Instance.new("Frame", main)
+flyRow.Size = UDim2.new(1, -20, 0, 40)
+flyRow.Position = UDim2.new(0, 10, 0, 50)
+flyRow.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Instance.new("UICorner", flyRow).CornerRadius = UDim.new(0, 10)
+
+local flyLabel = Instance.new("TextLabel", flyRow)
+flyLabel.Size = UDim2.new(0.7, 0, 1, 0)
+flyLabel.BackgroundTransparency = 1
+flyLabel.Text = "Fly to Base"
+flyLabel.Font = Enum.Font.GothamSemibold
+flyLabel.TextSize = 16
+flyLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyLabel.TextXAlignment = Enum.TextXAlignment.Left
+flyLabel.Position = UDim2.new(0.05, 0, 0, 0)
+
+local toggle = Instance.new("Frame", flyRow)
+toggle.Size = UDim2.new(0, 55, 0, 22)
+toggle.Position = UDim2.new(1, -65, 0.5, -11)
 toggle.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
 
 local circle = Instance.new("Frame", toggle)
-circle.Size = UDim2.new(0, 21, 0, 21)
-circle.Position = UDim2.new(0, 2, 0, 2)
+circle.Size = UDim2.new(0, 20, 0, 20)
+circle.Position = UDim2.new(0, 1, 0, 1)
 circle.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
 
--- ⚙️ Trạng thái
-local active = false
+-- ⚙️ Logic
+local flying = false
 local connection
-local hrp
 
--- 🔍 Tìm DeliveryHitbox
+-- 🧭 Tìm base của mình
 local function FindDelivery()
 	local plots = workspace:FindFirstChild("Plots")
-	if not plots then return nil end
-
+	if not plots then return end
 	for _, plot in pairs(plots:GetChildren()) do
 		local sign = plot:FindFirstChild("PlotSign")
 		if sign then
@@ -58,86 +72,76 @@ local function FindDelivery()
 			end
 		end
 	end
-	return nil
 end
 
--- ✈️ Bay về hitbox (khóa Y)
-local function FlyTo(target)
-	if not target or not hrp then return end
+-- 🛩️ Fly loop
+local function StartFly()
+	local delivery = FindDelivery()
+	if not delivery then
+		warn("⚠️ Không tìm thấy base!")
+		return
+	end
 
-	local speed = 20
-	local fixedY = hrp.Position.Y
+	local basePos = delivery.Position
+	local startY = hrp.Position.Y
+	local targetY = startY -- giữ y thay vì rớt nhanh
 
 	if connection then connection:Disconnect() end
-	connection = RunService.Heartbeat:Connect(function()
-		if not active or not hrp or not hrp.Parent then
-			if connection then connection:Disconnect() end
-			return
-		end
-
-		local targetPos = Vector3.new(target.Position.X, fixedY, target.Position.Z)
-		local direction = targetPos - hrp.Position
-		local distance = direction.Magnitude
-
-		if distance < 3 then
-			active = false
-			if connection then connection:Disconnect() end
+	connection = RunService.Heartbeat:Connect(function(dt)
+		if not flying then
+			connection:Disconnect()
 			hrp.Velocity = Vector3.zero
-			TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
-			TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0,2,0,2), BackgroundColor3 = Color3.fromRGB(200,0,0)}):Play()
 			return
 		end
 
-		local moveVector = direction.Unit * speed
-		hrp.Velocity = Vector3.new(moveVector.X, 0, moveVector.Z)
+		if not hrp or not hrp.Parent then return end
+
+		-- hướng về base (XZ)
+		local rootPos = hrp.Position
+		local dir = Vector3.new(basePos.X, rootPos.Y, basePos.Z) - rootPos
+		local distXZ = Vector2.new(dir.X, dir.Z).Magnitude
+		local distY = math.abs(basePos.Y - rootPos.Y)
+
+		-- khi gần base thì dừng lại
+		if distXZ <= 5 and distY <= 100 then
+			flying = false
+			hrp.Velocity = Vector3.zero
+			TweenService:Create(toggle, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
+			TweenService:Create(circle, TweenInfo.new(0.25), {
+				Position = UDim2.new(0,1,0,1),
+				BackgroundColor3 = Color3.fromRGB(200,0,0)
+			}):Play()
+			return
+		end
+
+		-- hạ 1 studs / 5s → 0.2 studs/s
+		targetY -= 0.2 * dt
+		local vel = dir.Unit * 20
+		vel = Vector3.new(vel.X, (targetY - rootPos.Y) * 5, vel.Z)
+
+		hrp.Velocity = vel
 	end)
 end
 
--- 🎛 Nút bật/tắt
-local function SetToggle(state)
-	active = state
-
-	if active then
-		TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
-		TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(1,-23,0,2), BackgroundColor3 = Color3.fromRGB(255,255,255)}):Play()
-		local hitbox = FindDelivery()
-		if hitbox then
-			FlyTo(hitbox)
-		else
-			warn("❌ Không tìm thấy DeliveryHitbox!")
-			SetToggle(false)
-		end
-	else
-		if connection then connection:Disconnect() end
-		if hrp then hrp.Velocity = Vector3.zero end
-		TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
-		TweenService:Create(circle, TweenInfo.new(0.2), {Position = UDim2.new(0,2,0,2), BackgroundColor3 = Color3.fromRGB(200,0,0)}):Play()
-	end
-end
-
--- 🖱 Xử lý khi nhấn nút GUI
+-- 🧲 Toggle
 toggle.InputBegan:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		SetToggle(not active)
-	end
-end)
-
--- 💀 Khi chết/spawn lại
-local function SetupCharacter(char)
-	hrp = char:WaitForChild("HumanoidRootPart", 10)
-	if active then
-		local hitbox = FindDelivery()
-		if hitbox then
-			FlyTo(hitbox)
+		flying = not flying
+		if flying then
+			TweenService:Create(toggle, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
+			TweenService:Create(circle, TweenInfo.new(0.25), {
+				Position = UDim2.new(1,-21,0,1),
+				BackgroundColor3 = Color3.fromRGB(255,255,255)
+			}):Play()
+			StartFly()
+		else
+			if connection then connection:Disconnect() end
+			hrp.Velocity = Vector3.zero
+			TweenService:Create(toggle, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
+			TweenService:Create(circle, TweenInfo.new(0.25), {
+				Position = UDim2.new(0,1,0,1),
+				BackgroundColor3 = Color3.fromRGB(200,0,0)
+			}):Play()
 		end
 	end
-end
-
-player.CharacterAdded:Connect(SetupCharacter)
-
--- Khởi tạo lần đầu
-if player.Character then
-	SetupCharacter(player.Character)
-else
-	player.CharacterAdded:Wait()
-end
+end)
