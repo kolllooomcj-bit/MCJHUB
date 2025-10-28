@@ -887,7 +887,7 @@ end)
 -- =========================
 -- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
-makeButton("OP FLY - WORK IN STEAL", function()
+makeButton("STEAL FLOOR", function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/kolllooomcj-bit/MCJHUB/refs/heads/main/Stealfloor"))()
 end)
 
