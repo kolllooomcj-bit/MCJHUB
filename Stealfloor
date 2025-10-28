@@ -1,3 +1,6 @@
+-- =========================
+-- ✨ MCJ - Steal Floor 3 (Local Fly Velocity + XZ Lock Fixed)
+-- =========================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
