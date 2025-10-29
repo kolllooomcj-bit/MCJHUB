@@ -1,0 +1,467 @@
+-- // MCJ ESP + GREEN BEAM + FLY V5 (with UseItem(0) on start)
+-- Put this LocalScript in StarterPlayerScripts
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- ========= GUI =========
+local gui = Instance.new("ScreenGui", playerGui)
+gui.Name = "MCJ_ESP_BEAM_FLY"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 240, 0, 130)
+frame.Position = UDim2.new(0.5, -120, 0.25, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+frame.Active = true
+frame.Draggable = true
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,26)
+title.Position = UDim2.new(0,0,0,4)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.Text = "MCJ ESP + BEAM + FLY V5"
+title.TextSize = 16
+title.TextColor3 = Color3.fromRGB(255,255,255)
+
+-- ESP row
+local espRow = Instance.new("Frame", frame)
+espRow.Size = UDim2.new(0, 220, 0, 36)
+espRow.Position = UDim2.new(0.5, -110, 0, 32)
+espRow.BackgroundTransparency = 1
+
+local espLabel = Instance.new("TextLabel", espRow)
+espLabel.Size = UDim2.new(0.68, 0, 1, 0)
+espLabel.Position = UDim2.new(0,6,0,0)
+espLabel.BackgroundTransparency = 1
+espLabel.Font = Enum.Font.GothamBold
+espLabel.Text = "ESP Best"
+espLabel.TextColor3 = Color3.fromRGB(255,255,255)
+espLabel.TextSize = 15
+espLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local toggle = Instance.new("Frame", espRow)
+toggle.Size = UDim2.new(0, 52, 0, 26)
+toggle.Position = UDim2.new(1, -64, 0.5, -13)
+toggle.BackgroundColor3 = Color3.fromRGB(80,80,80)
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(1,0)
+local circle = Instance.new("Frame", toggle)
+circle.Size = UDim2.new(0, 22, 0, 22)
+circle.Position = UDim2.new(0,2,0,2)
+circle.BackgroundColor3 = Color3.fromRGB(200,0,0)
+Instance.new("UICorner", circle).CornerRadius = UDim.new(1,0)
+
+-- Fly button
+local flyButton = Instance.new("TextButton", frame)
+flyButton.Size = UDim2.new(0, 200, 0, 34)
+flyButton.Position = UDim2.new(0.5, -100, 0, 76)
+flyButton.BackgroundColor3 = Color3.fromRGB(60,60,60)
+flyButton.Font = Enum.Font.GothamBold
+flyButton.Text = "Fly to Best"
+flyButton.TextSize = 16
+flyButton.TextColor3 = Color3.fromRGB(255,255,255)
+Instance.new("UICorner", flyButton).CornerRadius = UDim.new(0,8)
+
+-- ===== Vars =====
+local brainrotEspEnabled = false
+local currentBase = nil
+local currentGui = nil
+
+local mutationColors = {
+	Gold = Color3.fromRGB(255,215,0),
+	Diamond = Color3.fromRGB(0,255,255),
+	Lava = Color3.fromRGB(255,100,0),
+	Bloodrot = Color3.fromRGB(255,0,0),
+}
+
+-- ===== Helper funcs =====
+local function extractNumber(str)
+	if not str then return 0 end
+	local numberStr = str:match("%$(.-)/s")
+	if not numberStr then
+		local anyn = str:match("(%d+)")
+		return tonumber(anyn) or 0
+	end
+	numberStr = numberStr:gsub("%s","")
+	local mult = 1
+	if numberStr:lower():find("k") then mult = 1e3; numberStr = numberStr:gsub("[kK]","")
+	elseif numberStr:lower():find("m") then mult = 1e6; numberStr = numberStr:gsub("[mM]","")
+	elseif numberStr:lower():find("b") then mult = 1e9; numberStr = numberStr:gsub("[bB]","")
+	end
+	return (tonumber(numberStr) or 0) * mult
+end
+
+local function getAllOverheads()
+	local list = {}
+	local Plots = Workspace:FindFirstChild("Plots")
+	if not Plots then return list end
+	for _, plot in pairs(Plots:GetChildren()) do
+		local pods = plot:FindFirstChild("AnimalPodiums")
+		if pods then
+			for _, pod in pairs(pods:GetChildren()) do
+				local base = pod:FindFirstChild("Base")
+				if base and base:FindFirstChild("Spawn") then
+					local att = base.Spawn:FindFirstChild("Attachment")
+					if att and att:FindFirstChild("AnimalOverhead") then
+						table.insert(list, att.AnimalOverhead)
+					end
+				end
+			end
+		end
+	end
+	return list
+end
+
+local function createStatGui(base, overhead)
+	if base:FindFirstChild("StatGui") then base.StatGui:Destroy() end
+	local gui2 = Instance.new("BillboardGui", base)
+	gui2.Name = "StatGui"
+	gui2.Size = UDim2.new(0,220,0,70)
+	gui2.StudsOffset = Vector3.new(0,3.8,0)
+	gui2.AlwaysOnTop = true
+
+	local frame2 = Instance.new("Frame", gui2)  
+	frame2.Size = UDim2.new(1,0,1,0)  
+	frame2.BackgroundColor3 = Color3.fromRGB(18,18,18)  
+	frame2.BackgroundTransparency = 0.2  
+	frame2.BorderSizePixel = 0  
+	Instance.new("UICorner", frame2).CornerRadius = UDim.new(0,10)  
+
+	local layout = Instance.new("UIListLayout", frame2)  
+	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center  
+	layout.VerticalAlignment = Enum.VerticalAlignment.Center  
+	layout.Padding = UDim.new(0,2)  
+
+	local function makeLabel(txt, color)  
+		local l = Instance.new("TextLabel", frame2)  
+		l.Size = UDim2.new(1, -8, 0, 16)  
+		l.BackgroundTransparency = 1  
+		l.Font = Enum.Font.GothamBold  
+		l.TextScaled = true  
+		l.Text = txt  
+		l.TextColor3 = color or Color3.new(1,1,1)  
+		return l  
+	end  
+
+	local nameTxt = overhead:FindFirstChild("DisplayName") and overhead.DisplayName.Text or "Unknown"  
+	local genTxt = overhead:FindFirstChild("Generation") and overhead.Generation.Text or "0"  
+	local mutTxt = overhead:FindFirstChild("Mutation") and overhead.Mutation.Text or "Default"  
+	local rarTxt = overhead:FindFirstChild("Rarity") and overhead.Rarity.Text or "None"  
+
+	local color = mutationColors[mutTxt] or Color3.new(1,1,1)  
+	local isRainbow = (mutTxt == "Rainbow")  
+
+	local n1 = makeLabel(nameTxt, color)  
+	local n2 = makeLabel(genTxt, color)  
+	local n3 = makeLabel(mutTxt, color)  
+	local n4 = makeLabel(rarTxt, color)  
+
+	if isRainbow then  
+		task.spawn(function()  
+			local t = 0  
+			while gui2.Parent do  
+				t += RunService.RenderStepped:Wait() * 0.2  
+				local c = Color3.fromHSV(t%1,1,1)  
+				n1.TextColor3 = c; n2.TextColor3 = c; n3.TextColor3 = c; n4.TextColor3 = c  
+			end  
+		end)  
+	end  
+	return gui2
+end
+
+local function findBestBrainrot()
+	local bestVal = -math.huge
+	local bestBase = nil
+	local bestOverhead = nil
+	local bestColor, bestLabels, bestRainbow
+	for _, oh in pairs(getAllOverheads()) do  
+		local base = oh.Parent and oh.Parent.Parent and oh.Parent.Parent.Parent  
+		local gen = oh:FindFirstChild("Generation")  
+		if base and gen then  
+			local val = extractNumber(gen.Text)  
+			if val > bestVal then  
+				bestVal = val  
+				bestBase = base  
+				bestOverhead = oh  
+				local mut = oh:FindFirstChild("Mutation")  
+				local mtxt = mut and mut.Text or "Default"  
+				bestColor = mutationColors[mtxt] or Color3.new(1,1,1)  
+				bestLabels = {  
+					DisplayName = oh:FindFirstChild("DisplayName") and oh.DisplayName.Text or "Unknown",  
+					Generation = gen.Text,  
+					Mutation = mtxt,  
+					Rarity = oh:FindFirstChild("Rarity") and oh.Rarity.Text or "None"  
+				}  
+				bestRainbow = (mtxt == "Rainbow")  
+			end  
+		end  
+	end  
+	return bestBase, bestOverhead, bestLabels, bestColor, bestRainbow
+end
+
+-- ===== ESP =====
+local espTask
+local function startESP()
+	if espTask then return end
+	espTask = task.spawn(function()
+		while brainrotEspEnabled do
+			local base, overhead, labels, color, rainbow = findBestBrainrot()
+			if base then
+				if currentGui and currentGui.Parent then currentGui:Destroy() end
+				currentBase = base
+				currentGui = createStatGui(base, overhead)
+			else
+				if currentGui and currentGui.Parent then currentGui:Destroy() end
+				currentBase = nil
+				currentGui = nil
+			end
+			task.wait(1)
+		end
+		espTask = nil
+	end)
+end
+
+local function stopESP()
+	brainrotEspEnabled = false
+	if currentGui and currentGui.Parent then currentGui:Destroy() end
+	currentGui = nil
+	currentBase = nil
+end
+
+local function setESP(state)
+	brainrotEspEnabled = state
+	if state then
+		TweenService:Create(toggle, TweenInfo.new(0.18), {BackgroundColor3 = Color3.fromRGB(0,200,100)}):Play()
+		TweenService:Create(circle, TweenInfo.new(0.18), {Position = UDim2.new(1,-28,0,2), BackgroundColor3 = Color3.fromRGB(255,255,255)}):Play()
+		startESP()
+	else
+		TweenService:Create(toggle, TweenInfo.new(0.18), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
+		TweenService:Create(circle, TweenInfo.new(0.18), {Position = UDim2.new(0,2,0,2), BackgroundColor3 = Color3.fromRGB(200,0,0)}):Play()
+		stopESP()
+	end
+end
+
+toggle.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		setESP(not brainrotEspEnabled)
+	end
+end)
+
+-- ===== BEAM =====
+local beam, originAttachment, targetAttachment, originPart
+do
+	originPart = Instance.new("Part")
+	originPart.Name = "MCJ_BeamOrigin"
+	originPart.Size = Vector3.new(0.2,0.2,0.2)
+	originPart.Transparency = 1
+	originPart.CanCollide = false
+	originPart.Anchored = false
+	originPart.Parent = Workspace
+
+	originAttachment = Instance.new("Attachment")
+	originAttachment.Name = "MCJ_BeamOriginAttach"
+	originAttachment.Parent = originPart
+
+	targetAttachment = Instance.new("Attachment")
+	targetAttachment.Name = "MCJ_BeamTargetAttach"
+	targetAttachment.Parent = Workspace
+
+	beam = Instance.new("Beam")
+	beam.Name = "MCJ_GreenBeam"
+	beam.Attachment0 = originAttachment
+	beam.Attachment1 = targetAttachment
+	beam.FaceCamera = true
+	beam.Segments = 10
+	beam.Width0 = 0.18
+	beam.Width1 = 0.18
+	beam.Color = ColorSequence.new(Color3.fromRGB(30, 220, 60))
+	beam.LightEmission = 0.6
+	beam.Transparency = NumberSequence.new(0)
+	beam.Parent = originPart
+	beam.Enabled = false
+end
+
+local function getBasePartForBeam(base)
+	if not base then return nil end
+	if base.PrimaryPart then return base.PrimaryPart end
+	local spawn = base:FindFirstChild("Spawn")
+	if spawn and spawn:IsA("BasePart") then return spawn end
+	for _,v in pairs(base:GetDescendants()) do
+		if v:IsA("BasePart") then return v end
+	end
+	return nil
+end
+
+local currentBasePart -- for beam
+RunService.RenderStepped:Connect(function()
+	local char = player.Character
+	if not char then beam.Enabled = false return end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	local head = char:FindFirstChild("Head")
+	local originPosPart = head or hrp
+	if not originPosPart then beam.Enabled = false return end
+	if currentBase then
+		local tgtPart = getBasePartForBeam(currentBase)
+		if tgtPart then
+			currentBasePart = tgtPart
+			originPart.CFrame = originPosPart.CFrame
+			originPart.Parent = char
+			if targetAttachment.Parent ~= tgtPart then
+				targetAttachment.Parent = tgtPart
+				targetAttachment.Position = Vector3.new(0,0,0)
+			end
+			beam.Enabled = true
+		else
+			beam.Enabled = false
+		end
+	else
+		beam.Enabled = false
+	end
+end)
+
+-- ===== FLY V5 =====
+local function autoEquipGrapple(flagTable)
+	task.spawn(function()
+		while flagTable.active do
+			local char = player.Character
+			if char and not char:FindFirstChild("Grapple Hook") then
+				local tool = player.Backpack and player.Backpack:FindFirstChild("Grapple Hook")
+				if tool and char:FindFirstChild("Humanoid") then
+					char.Humanoid:EquipTool(tool)
+				end
+			end
+			task.wait(0.3)
+		end
+	end)
+end
+
+local function getClosestPart()
+	local char = player.Character
+	if not char or not char:FindFirstChild("HumanoidRootPart") then return nil end
+	local hrp = char.HumanoidRootPart
+	local closest, dist = nil, math.huge
+	for _, v in pairs(Workspace:GetDescendants()) do
+		if v:IsA("BasePart") and v.CanCollide and v.Transparency < 1 and not v:IsDescendantOf(char) then
+			local d = (v.Position - hrp.Position).Magnitude
+			if d < dist and d < 200 then
+				dist = d
+				closest = v
+			end
+		end
+	end
+	return closest
+end
+
+local function simulateGrappleClickClosest()
+	local char = player.Character
+	if not char then return end
+	local tool = char:FindFirstChild("Grapple Hook") or (player.Backpack and player.Backpack:FindFirstChild("Grapple Hook"))
+	if not tool then return end
+	if not char:FindFirstChild("Grapple Hook") and tool and char:FindFirstChild("Humanoid") then
+		char.Humanoid:EquipTool(tool)
+		task.wait(0.25)
+	end
+	local equipped = char:FindFirstChild("Grapple Hook")
+	if not equipped or not equipped:FindFirstChild("RemoteEvent") then return end
+	local remote = equipped.RemoteEvent
+	local closestPart = getClosestPart()
+	if closestPart then
+		pcall(function()
+			remote:FireServer(closestPart, closestPart.Position)
+		end)
+	end
+end
+
+local function flyToPosition(targetPos)
+	local char = player.Character or player.CharacterAdded:Wait()
+	local hrp = char:WaitForChild("HumanoidRootPart")
+	if not hrp then return end
+	local startY = hrp.Position.Y
+	local startTime = tick()
+	local duration = 2
+
+	task.spawn(function()
+		local t = 0
+		while tick() - startTime < duration and beam do
+			t += RunService.RenderStepped:Wait() * 0.6
+			local c = Color3.fromHSV(t % 1, 1, 1)
+			beam.Color = ColorSequence.new(c)
+		end
+	end)
+
+	local conn
+	conn = RunService.Heartbeat:Connect(function()
+		if not hrp then conn:Disconnect() return end
+		local elapsed = tick() - startTime
+		if elapsed >= duration then
+			hrp.Velocity = Vector3.zero
+			conn:Disconnect()
+			return
+		end
+		local dir = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position)
+		if dir.Magnitude > 0 then dir = dir.Unit end
+		local progress = math.clamp(elapsed / duration, 0, 1)
+		local desiredY = startY + progress * 200
+		local vel = Vector3.new(dir.X, 0, dir.Z) * 250 + Vector3.new(0, (desiredY - hrp.Position.Y) * 8, 0)
+		hrp.Velocity = vel
+	end)
+
+	task.wait(0.15)
+	simulateGrappleClickClosest()
+
+	task.wait(duration)
+	if conn then conn:Disconnect() end
+	hrp.Velocity = Vector3.zero
+end
+
+-- Remote for UseItem (will be called with arg 0 when starting fly)
+local UseItemRemote
+pcall(function()
+	UseItemRemote = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/UseItem")
+end)
+
+flyButton.MouseButton1Click:Connect(function()
+	local bestBase = select(1, findBestBrainrot())
+	if not bestBase then return end
+	local tgtPart = getBasePartForBeam(bestBase) or bestBase
+	local targetPos = tgtPart.Position
+
+	-- start auto-equip loop
+	local flag = {active = true}
+	autoEquipGrapple(flag)
+
+	-- call UseItem with arg 0 right when fly starts (wrapped in pcall)
+	task.spawn(function()
+		local args = {0}
+		if UseItemRemote then
+			pcall(function()
+				UseItemRemote:FireServer(unpack(args))
+			end)
+		end
+	end)
+
+	-- enable beam and fly
+	currentBase = bestBase
+	beam.Enabled = true
+
+	-- fly above target
+	local flyTarget = (tgtPart and tgtPart.Position) and (tgtPart.Position + Vector3.new(0, 30, 0)) or (bestBase.PrimaryPart and bestBase.PrimaryPart.Position + Vector3.new(0,10,0)) or (bestBase:GetModelCFrame().p + Vector3.new(0,30,0))
+	flyToPosition(flyTarget)
+
+	-- stop auto-equip loop
+	flag.active = false
+
+	-- cleanup
+	beam.Enabled = false
+	if currentGui and currentGui.Parent then currentGui:Destroy() end
+	currentGui = nil
+	currentBase = nil
+end)
