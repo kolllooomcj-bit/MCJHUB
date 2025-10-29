@@ -70,6 +70,13 @@ end)
 -- =========================
 -- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
+makeButton("FLY TO BEST", function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/kolllooomcj-bit/MCJHUB/refs/heads/main/Fly%20to%20best"))()
+end)
+
+-- =========================
+-- NÚT 3: FLOAT Gui (Pastefy)
+-- =========================
 makeButton("SKYWALK", function()
 loadstring(game:HttpGet("https://pastefy.app/P2CWBaHF/raw"))()
 end)
@@ -899,34 +906,6 @@ loadstring(game:HttpGet("https://pastefy.app/YkHHDqR2/raw"))()
 end)
 
 -- =========================
--- NÚT 4: KurdHub
--- =========================
-makeButton("KurdHub", function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Ninja10908/S4/refs/heads/main/Kurdhub"))()
-end)
-
--- =========================
--- NÚT 5: Lonnon
--- =========================
-makeButton("Lonnon", function()
-loadstring(game:HttpGet("https://pastefy.app/MJw2J4T6/raw"))()
-end)
-
--- =========================
--- NÚT 6: Delfi
--- =========================
-makeButton("Delfi", function()
-loadstring(game:HttpGet("https://pastefy.app/UTq45GC2/raw"))()
-end)
-
--- =========================
--- NÚT 7: Chilli Hub
--- =========================
-makeButton("Chilli Hub", function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/tienkhanh1/spicy/main/Chilli.lua"))()
-end)
-
--- =========================
 -- Hide/Show Button (luôn góc trên phải)
 -- =========================
 local toggleBtn = Instance.new("TextButton", gui)
@@ -943,13 +922,6 @@ Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0,8)
 toggleBtn.MouseButton1Click:Connect(function()
 frame.Visible = not frame.Visible
 toggleBtn.Text = frame.Visible and "Hide GUI" or "Show GUI"
-end)
-
--- =========================
--- NÚT 8: Maranda
--- =========================
-makeButton("Maranda", function()
-loadstring(game:HttpGet("https://pastefy.app/JJVhs3rK/raw"))()
 end)
 
 -- =========================
@@ -1030,15 +1002,10 @@ end
 end)
 
 -- =========================
--- NÚT 12: Load Vietnam Hub
+-- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
-makeButton("🇻🇳 Load Vietnam Hub", function()
-local success, err = pcall(function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/replit8173/VietnamHub/refs/heads/main/VietnamseHub.lua", true))()
-end)
-if not success then
-warn("[MCJ] Lỗi khi load Vietnam Hub:", err)
-end
+makeButton("ALL IN ONE", function()
+loadstring(game:HttpGet("https://pastefy.app/gsyY9wzH/raw"))()
 end)
 
 -- 🟣 CỤM INFINITE YIELD (luôn nằm cuối scroll)
@@ -1070,199 +1037,4 @@ Instance.new("UICorner", infiniteBtn).CornerRadius = UDim.new(0,10)
 
 infiniteBtn.MouseButton1Click:Connect(function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-end)
--- =========================
--- NÚT 15: MCJ Key System
--- =========================
-makeButton("VIP SCRIPT", function()
-    local player = game.Players.LocalPlayer
-    local gui = player:WaitForChild("PlayerGui")
-    local Clipboard = setclipboard or toclipboard
-    local currentKey = nil
-
-    -- Nếu GUI đã tồn tại, không tạo lại
-    if gui:FindFirstChild("MCJKeySystemGui") then
-        return
-    end
-
-    -- =========================
-    -- Tạo GUI
-    -- =========================
-    local codeGui = Instance.new("ScreenGui", gui)
-    codeGui.Name = "MCJKeySystemGui"
-    codeGui.ResetOnSpawn = false
-
-    local frame = Instance.new("Frame", codeGui)
-    frame.Size = UDim2.new(0, 340, 0, 200)
-    frame.Position = UDim2.new(0.5, -170, 0.5, -100)
-    frame.BackgroundColor3 = Color3.fromRGB(20,20,25)
-    frame.Active = true
-    frame.Draggable = true
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0,14)
-
-    -- Hiệu ứng viền VIP Gradient
-    local gradient = Instance.new("UIGradient", frame)
-    gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(0,255,140)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,200,255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,0))
-    }
-    gradient.Rotation = 45
-
-    -- Tiêu đề
-    local title = Instance.new("TextLabel", frame)
-    title.Size = UDim2.new(1,0,0,40)
-    title.BackgroundTransparency = 1
-    title.Text = "GET KEY"
-    title.TextColor3 = Color3.fromRGB(255,255,0)
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 20
-
-    -- Nút đóng
-    local closeBtn = Instance.new("TextButton", frame)
-    closeBtn.Size = UDim2.new(0,30,0,30)
-    closeBtn.Position = UDim2.new(1,-35,0,5)
-    closeBtn.Text = "X"
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.TextSize = 18
-    closeBtn.TextColor3 = Color3.fromRGB(255,50,50)
-    closeBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0,6)
-    closeBtn.MouseButton1Click:Connect(function()
-        codeGui:Destroy()
-    end)
-
-    -- Ô nhập key
-    local textBox = Instance.new("TextBox", frame)
-    textBox.Size = UDim2.new(0.8, 0, 0, 40)
-    textBox.Position = UDim2.new(0.1,0,0.35,0)
-    textBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
-    textBox.TextColor3 = Color3.fromRGB(255,255,255)
-    textBox.Font = Enum.Font.Gotham
-    textBox.TextSize = 16
-    textBox.PlaceholderText = "Nhập key của bạn..."
-    Instance.new("UICorner", textBox).CornerRadius = UDim.new(0,8)
-
-    -- Nút Get Key
-    local getKeyBtn = Instance.new("TextButton", frame)
-    getKeyBtn.Size = UDim2.new(0.4, 0, 0, 40)
-    getKeyBtn.Position = UDim2.new(0.05, 0, 0.7, 0)
-    getKeyBtn.Text = "🔑 Get Key"
-    getKeyBtn.Font = Enum.Font.GothamBold
-    getKeyBtn.TextSize = 16
-    getKeyBtn.TextColor3 = Color3.new(0,0,0)
-    getKeyBtn.BackgroundColor3 = Color3.fromRGB(0,255,150)
-    Instance.new("UICorner", getKeyBtn).CornerRadius = UDim.new(0,8)
-
-    -- Nút Check Key
-    local checkBtn = Instance.new("TextButton", frame)
-    checkBtn.Size = UDim2.new(0.4, 0, 0, 40)
-    checkBtn.Position = UDim2.new(0.55, 0, 0.7, 0)
-    checkBtn.Text = "✅ Check Key"
-    checkBtn.Font = Enum.Font.GothamBold
-    checkBtn.TextSize = 16
-    checkBtn.TextColor3 = Color3.new(0,0,0)
-    checkBtn.BackgroundColor3 = Color3.fromRGB(255,200,0)
-    Instance.new("UICorner", checkBtn).CornerRadius = UDim.new(0,8)
-
-    -- Hiệu ứng hover VIP
-    for _, btn in pairs({getKeyBtn, checkBtn}) do
-        btn.MouseEnter:Connect(function()
-            btn.BackgroundColor3 = Color3.fromRGB(255,255,255)
-        end)
-        btn.MouseLeave:Connect(function()
-            if btn == getKeyBtn then
-                btn.BackgroundColor3 = Color3.fromRGB(0,255,150)
-            else
-                btn.BackgroundColor3 = Color3.fromRGB(255,200,0)
-            end
-        end)
-    end
-
-    -- Logic Get Key
-    getKeyBtn.MouseButton1Click:Connect(function()
-        local randomNum = math.random(1000000000, 9999999999)
-        currentKey = "Mcjrealcode" .. tostring(randomNum)
-        getKeyBtn.Text = "⏳ Đang tạo key..."
-        task.wait(10)
-
-        if Clipboard then
-            Clipboard(currentKey)
-        end
-
-        getKeyBtn.Text = "✅ Đã sao chép!"
-        task.wait(1.5)
-        getKeyBtn.Text = "🔑 Get Key"
-    end)
-
-    -- Logic Check Key
-    checkBtn.MouseButton1Click:Connect(function()
-        if textBox.Text == currentKey then
-            codeGui:Destroy()
-
-            -- GUI VIP Menu sau khi đúng key
-            local vipGui = Instance.new("ScreenGui", gui)
-            vipGui.Name = "MCJVIPMenu"
-
-            local vipFrame = Instance.new("Frame", vipGui)
-            vipFrame.Size = UDim2.new(0, 320, 0, 160)
-            vipFrame.Position = UDim2.new(0.5, -160, 0.5, -80)
-            vipFrame.BackgroundColor3 = Color3.fromRGB(15,15,20)
-            Instance.new("UICorner", vipFrame).CornerRadius = UDim.new(0,14)
-
-            local vipTitle = Instance.new("TextLabel", vipFrame)
-            vipTitle.Size = UDim2.new(1,0,0,40)
-            vipTitle.BackgroundTransparency = 1
-            vipTitle.Text = "🌟 MCJ VIP MENU"
-            vipTitle.TextColor3 = Color3.fromRGB(255,255,0)
-            vipTitle.Font = Enum.Font.GothamBold
-            vipTitle.TextSize = 20
-
-            local btn1 = Instance.new("TextButton", vipFrame)
-            btn1.Size = UDim2.new(0.4,0,0,45)
-            btn1.Position = UDim2.new(0.07,0,0.45,0)
-            btn1.Text = "⚙️ Create Server"
-            btn1.Font = Enum.Font.GothamBold
-            btn1.TextSize = 16
-            btn1.BackgroundColor3 = Color3.fromRGB(0,180,255)
-            btn1.TextColor3 = Color3.new(1,1,1)
-            Instance.new("UICorner", btn1).CornerRadius = UDim.new(0,8)
-
-            local btn2 = Instance.new("TextButton", vipFrame)
-            btn2.Size = UDim2.new(0.4,0,0,45)
-            btn2.Position = UDim2.new(0.53,0,0.45,0)
-            btn2.Text = "🐾 Pet Finder"
-            btn2.Font = Enum.Font.GothamBold
-            btn2.TextSize = 16
-            btn2.BackgroundColor3 = Color3.fromRGB(255,120,0)
-            btn2.TextColor3 = Color3.new(1,1,1)
-            Instance.new("UICorner", btn2).CornerRadius = UDim.new(0,8)
-
-            -- Nút đóng menu VIP
-            local closeVip = Instance.new("TextButton", vipFrame)
-            closeVip.Size = UDim2.new(0,30,0,30)
-            closeVip.Position = UDim2.new(1,-35,0,5)
-            closeVip.Text = "X"
-            closeVip.Font = Enum.Font.GothamBold
-            closeVip.TextSize = 18
-            closeVip.TextColor3 = Color3.fromRGB(255,50,50)
-            closeVip.BackgroundColor3 = Color3.fromRGB(50,50,50)
-            Instance.new("UICorner", closeVip).CornerRadius = UDim.new(0,6)
-            closeVip.MouseButton1Click:Connect(function()
-                vipGui:Destroy()
-            end)
-
-            -- Execute code VIP
-            btn1.MouseButton1Click:Connect(function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/ZenithExility/ZenikazeHub/refs/heads/main/ZenikazeV3.1"))()
-            end)
-
-            btn2.MouseButton1Click:Connect(function()
-                loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/083f208b2d5d19c6b565190b0d2293c9.lua"))()
-            end)
-        else
-            textBox.Text = ""
-            textBox.PlaceholderText = "❌ Sai key!"
-        end
-    end)
 end)
