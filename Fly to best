@@ -409,8 +409,8 @@ local function flyToPosition(targetPos)
 		local dir = (Vector3.new(targetPos.X, hrp.Position.Y, targetPos.Z) - hrp.Position)
 		if dir.Magnitude > 0 then dir = dir.Unit end
 		local progress = math.clamp(elapsed / duration, 0, 1)
-		local desiredY = startY + progress * 200
-		local vel = Vector3.new(dir.X, 0, dir.Z) * 250 + Vector3.new(0, (desiredY - hrp.Position.Y) * 8, 0)
+		local desiredY = startY + progress * 150
+		local vel = Vector3.new(dir.X, 0, dir.Z) * 200 + Vector3.new(0, (desiredY - hrp.Position.Y) * 8, 0)
 		hrp.Velocity = vel
 	end)
 
