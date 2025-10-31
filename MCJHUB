@@ -1,58 +1,91 @@
--- // 🟢 MCJ Hub GUI 🟢 //
--- LocalScript (Executor hoặc StarterPlayerScripts)
-
+-- // ⚡ MCJ HUB GUI – Galaxy Panel v3 //
+local TweenService = game:GetService("TweenService")
 local player = game.Players.LocalPlayer
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-gui.Name = "MCJ_MainGui"
+gui.Name = "MCJ_Hub"
 gui.ResetOnSpawn = false
 
--- Main Frame
+-- 🌌 Main Frame
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 300, 0, 300)
-frame.Position = UDim2.new(0.5, -150, 0.5, -150) -- luôn giữa màn hình
-frame.BackgroundColor3 = Color3.fromRGB(20,20,25)
+frame.Size = UDim2.new(0, 380, 0, 420)
+frame.Position = UDim2.new(0.5, -190, 0.5, -210)
+frame.BackgroundColor3 = Color3.fromRGB(18,18,25)
+frame.Visible = true
+frame.Active = true
+frame.Draggable = true
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0,14)
 
--- Title
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,0,0,40)
-title.BackgroundTransparency = 1
-title.Text = "⚡ MCJ Hub ⚡"
-title.TextColor3 = Color3.fromRGB(0,255,150)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 20
+local stroke = Instance.new("UIStroke", frame)
+stroke.Thickness = 1.4
+stroke.Color = Color3.fromRGB(255,255,255)
+stroke.Transparency = 0.4
 
--- Scrolling Container
+-- 🌈 Gradient nền
+local gradient = Instance.new("UIGradient", frame)
+gradient.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(120,60,255)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255,60,180)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(0,160,255))
+}
+gradient.Rotation = 45
+
+-- 🧩 Header
+local header = Instance.new("Frame", frame)
+header.Size = UDim2.new(1, -20, 0, 50)
+header.Position = UDim2.new(0,10,0,10)
+header.BackgroundColor3 = Color3.fromRGB(25,25,35)
+Instance.new("UICorner", header).CornerRadius = UDim.new(0,10)
+
+local title = Instance.new("TextLabel", header)
+title.Size = UDim2.new(0.7,0,1,0)
+title.Position = UDim2.new(0,10,0,0)
+title.BackgroundTransparency = 1
+title.Text = "⚡ MCJ Hub ⚡- NEW UI  "
+title.TextColor3 = Color3.fromRGB(0,255,180)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- 📜 Scrolling Container
 local scroll = Instance.new("ScrollingFrame", frame)
-scroll.Size = UDim2.new(1, -10, 1, -50)
-scroll.Position = UDim2.new(0,5,0,45)
+scroll.Size = UDim2.new(1,-20,1,-70)
+scroll.Position = UDim2.new(0,10,0,60)
 scroll.BackgroundTransparency = 1
-scroll.CanvasSize = UDim2.new(0,0,0,0)
 scroll.ScrollBarThickness = 6
+scroll.CanvasSize = UDim2.new(0,0,0,0)
+scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 
 local layout = Instance.new("UIListLayout", scroll)
 layout.Padding = UDim.new(0,8)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- Auto size canvas
-layout.Changed:Connect(function()
-scroll.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
-end)
-
--- Function tạo nút
+-- 🪄 Hàm tạo nút
 local function makeButton(name, callback)
-local btn = Instance.new("TextButton", scroll)
-btn.Size = UDim2.new(0,260,0,45)
-btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-btn.TextColor3 = Color3.fromRGB(0,255,150)
-btn.Font = Enum.Font.GothamBold
-btn.TextSize = 18
-btn.Text = name
-Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
-btn.MouseButton1Click:Connect(callback)
+	local btn = Instance.new("TextButton", scroll)
+	btn.Size = UDim2.new(0,320,0,45)
+	btn.BackgroundColor3 = Color3.fromRGB(35,35,45)
+	btn.TextColor3 = Color3.fromRGB(0,255,180)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 18
+	btn.Text = name
+	btn.AutoButtonColor = true
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,10)
+
+	local stroke = Instance.new("UIStroke", btn)
+	stroke.Thickness = 1.2
+	stroke.Color = Color3.fromRGB(0,255,180)
+	stroke.Transparency = 0.5
+
+	btn.MouseButton1Click:Connect(callback)
 end
 
+-- 🪄 Auto resize scroll
+layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	scroll.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
+end)
+
+-- 🔘 Nút mẫu
 -- =========================
 -- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
@@ -1037,4 +1070,52 @@ Instance.new("UICorner", infiniteBtn).CornerRadius = UDim.new(0,10)
 
 infiniteBtn.MouseButton1Click:Connect(function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+end)
+
+-- 👁️ Nút Toggle góc phải (đẹp hơn + có viền tím sáng)
+local toggleBtn = Instance.new("TextButton", gui)
+toggleBtn.Size = UDim2.new(0,120,0,40)
+toggleBtn.Position = UDim2.new(1,-140,0,10)
+toggleBtn.Text = "Hide GUI"
+toggleBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
+toggleBtn.TextColor3 = Color3.new(1,1,1)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 16
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0,10)
+
+local toggleStroke = Instance.new("UIStroke", toggleBtn)
+toggleStroke.Thickness = 2
+toggleStroke.Color = Color3.fromRGB(180,80,255)
+toggleStroke.Transparency = 0.1
+
+-- ✨ Hiệu ứng viền tím sáng nhấp nháy nhẹ
+task.spawn(function()
+	while task.wait(0.1) do
+		local h = (tick() * 0.4) % 1
+		toggleStroke.Color = Color3.fromHSV(h, 0.7, 1)
+	end
+end)
+
+-- 🌀 Tween ẩn/hiện GUI mượt
+local isHidden = false
+toggleBtn.MouseButton1Click:Connect(function()
+	if not isHidden then
+		isHidden = true
+		toggleBtn.Text = "Show GUI"
+		TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = UDim2.new(0,380,0,0)}):Play()
+		task.wait(0.25)
+		scroll.Visible = false
+		frame.Visible = false
+	else
+		isHidden = false
+		frame.Visible = true
+		scroll.Visible = true
+		TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = UDim2.new(0,380,0,420)}):Play()
+		toggleBtn.Text = "Hide GUI"
+	end
+end)
+
+-- ❌ Close button destroy GUI
+closeBtn.MouseButton1Click:Connect(function()
+	gui:Destroy()
 end)
