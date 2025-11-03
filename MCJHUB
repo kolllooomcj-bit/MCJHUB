@@ -89,6 +89,13 @@ end)
 -- =========================
 -- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
+makeButton("Speed boost", function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/kolllooomcj-bit/MCJHUB/refs/heads/main/Loopspeed"))()
+end)
+
+-- =========================
+-- NÚT 3: FLOAT Gui (Pastefy)
+-- =========================
 makeButton("FLY TO BASE", function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/kolllooomcj-bit/MCJHUB/refs/heads/main/Flytobase"))()
 end)
