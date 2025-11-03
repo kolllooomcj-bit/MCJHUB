@@ -1,0 +1,123 @@
+-- LocalScript: StarterPlayerScripts/MCJ_LoopSpeed.lua
+-- Khi bật: loop giữ speed = 50 trong 5s rồi trả lại bình thường
+-- Có GUI nhỏ, kéo được, bật lại được nhiều lần
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+-- 🧍 Lấy humanoid
+local function getHumanoid()
+	local char = player.Character or player.CharacterAdded:Wait()
+	return char:WaitForChild("Humanoid")
+end
+
+-- 🎨 GUI setup
+local gui = Instance.new("ScreenGui")
+gui.Name = "MCJ_LoopSpeed"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 160, 0, 70)
+frame.Position = UDim2.new(0.8, 0, 0.8, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.BackgroundTransparency = 0.1
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+local stroke = Instance.new("UIStroke", frame)
+stroke.Thickness = 1.2
+stroke.Color = Color3.fromRGB(60, 60, 60)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 25)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 14
+title.Text = "⚡ MCJ Loop Speed"
+title.Parent = frame
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 120, 0, 30)
+button.Position = UDim2.new(0.5, -60, 0.5, -5)
+button.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
+button.TextColor3 = Color3.new(1, 1, 1)
+button.Font = Enum.Font.GothamBold
+button.TextSize = 16
+button.Text = "Kích Hoạt"
+button.Parent = frame
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
+
+local timerLabel = Instance.new("TextLabel")
+timerLabel.Size = UDim2.new(1, 0, 0, 20)
+timerLabel.Position = UDim2.new(0, 0, 1, -20)
+timerLabel.BackgroundTransparency = 1
+timerLabel.Font = Enum.Font.Gotham
+timerLabel.TextSize = 14
+timerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+timerLabel.Text = ""
+timerLabel.Parent = frame
+
+-- ⚙️ Logic
+local looping = false
+
+local function startSpeedLoop()
+	if looping then return end
+	looping = true
+
+	local humanoid = getHumanoid()
+	local originalSpeed = humanoid.WalkSpeed
+	local active = true
+	local timer = 3
+
+	-- Giao diện đổi màu
+	button.Text = "Đang chạy..."
+	button.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+
+	-- Bắt đầu loop giữ tốc độ
+	local loopConn
+	loopConn = RunService.Heartbeat:Connect(function()
+		if not active then
+			loopConn:Disconnect()
+			return
+		end
+		if humanoid and humanoid.Parent then
+			humanoid.WalkSpeed = 50
+		end
+	end)
+
+	-- Đếm ngược 5 giây
+	while timer > 0 do
+		timerLabel.Text = "⏳ Còn " .. timer .. " giây"
+		task.wait(1)
+		timer -= 1
+	end
+
+	-- Dừng loop
+	active = false
+	humanoid.WalkSpeed = originalSpeed
+	timerLabel.Text = "✅ Đã trở lại bình thường"
+	button.Text = "Kích Hoạt"
+	button.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
+
+	task.wait(1.5)
+	timerLabel.Text = ""
+	looping = false
+end
+
+button.MouseButton1Click:Connect(startSpeedLoop)
+
+-- Reset khi respawn
+player.CharacterAdded:Connect(function()
+	task.wait(1)
+	looping = false
+	timerLabel.Text = ""
+	button.Text = "Kích Hoạt"
+	button.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
+end)
