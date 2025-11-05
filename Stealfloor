@@ -1,193 +1,188 @@
 -- =========================
--- ✨ MCJ - Steal Floor 3 (Local Fly Velocity + XZ Lock Fixed)
+-- ✨ MCJ FLOOR - Fly Script (with draggable UI)
 -- =========================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+
 local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
 
 local flyRunning = false
 local storedTransparency = {}
 local xzLockParts = {}
 
--- 🧩 Lưu & chỉnh độ mờ tất cả part
+-- 🧩 Lưu & chỉnh độ mờ
 local function setAllPartsTransparency(value)
-for _, part in ipairs(workspace:GetDescendants()) do
-if part:IsA("BasePart") then
-if storedTransparency[part] == nil then
-storedTransparency[part] = part.Transparency
-end
-part.Transparency = value
-end
-end
+	for _, part in ipairs(workspace:GetDescendants()) do
+		if part:IsA("BasePart") then
+			if storedTransparency[part] == nil then
+				storedTransparency[part] = part.Transparency
+			end
+			part.Transparency = value
+		end
+	end
 end
 
--- 🧩 Khôi phục lại độ mờ
+-- 🧩 Khôi phục độ mờ
 local function restorePartsTransparency()
-for part, original in pairs(storedTransparency) do
-if part and part:IsDescendantOf(workspace) then
-part.Transparency = original
-end
-end
-storedTransparency = {}
+	for part, original in pairs(storedTransparency) do
+		if part and part:IsDescendantOf(workspace) then
+			part.Transparency = original
+		end
+	end
+	storedTransparency = {}
 end
 
--- 🧩 Xóa khung khóa
+-- 🧩 Xóa khung XZ
 local function removeXZLock()
-for _, p in ipairs(xzLockParts) do
-if p and p.Parent then
-p:Destroy()
-end
-end
-xzLockParts = {}
+	for _, p in ipairs(xzLockParts) do
+		if p and p.Parent then p:Destroy() end
+	end
+	xzLockParts = {}
 end
 
--- 🧩 Tạo “khung khóa” XZ quanh nhân vật
+-- 🧩 Tạo khung XZ quanh nhân vật
 local function createXZLock(hrp)
-removeXZLock()
+	removeXZLock()
+	local size, thickness = 4, 1
+	local offsets = {
+		Vector3.new(size/2, 0, 0),
+		Vector3.new(-size/2, 0, 0),
+		Vector3.new(0, 0, size/2),
+		Vector3.new(0, 0, -size/2)
+	}
 
-local size = 6  
-local thickness = 1  
+	for _, offset in ipairs(offsets) do
+		local wall = Instance.new("Part")
+		wall.Anchored = true
+		wall.CanCollide = true
+		wall.Transparency = 1
+		wall.Size = Vector3.new(
+			math.abs(offset.X) > 0 and thickness or size,
+			10,
+			math.abs(offset.Z) > 0 and thickness or size
+		)
+		wall.CFrame = hrp.CFrame * CFrame.new(offset)
+		wall.Parent = workspace
+		table.insert(xzLockParts, wall)
+	end
 
-local offsets = {  
-	Vector3.new(size/2, 0, 0),  
-	Vector3.new(-size/2, 0, 0),  
-	Vector3.new(0, 0, size/2),  
-	Vector3.new(0, 0, -size/2)  
-}  
-
-for _, offset in ipairs(offsets) do  
-	local wall = Instance.new("Part")  
-	wall.Anchored = true  
-	wall.CanCollide = true  
-	wall.Transparency = 1  
-	wall.Size = Vector3.new(  
-		math.abs(offset.X) > 0 and thickness or size,  
-		10,  
-		math.abs(offset.Z) > 0 and thickness or size  
-	)  
-	wall.CFrame = hrp.CFrame * CFrame.new(offset)  
-	wall.Parent = workspace  
-	table.insert(xzLockParts, wall)  
-end  
-
--- sàn chống rơi  
-local floor = Instance.new("Part")  
-floor.Anchored = true  
-floor.CanCollide = true  
-floor.Transparency = 1  
-floor.Size = Vector3.new(size, 1, size)  
-floor.CFrame = hrp.CFrame * CFrame.new(0, -3, 0)  
-floor.Parent = workspace  
-table.insert(xzLockParts, floor)
-
+	local floor = Instance.new("Part")
+	floor.Anchored = true
+	floor.CanCollide = true
+	floor.Transparency = 1
+	floor.Size = Vector3.new(size, 1, size)
+	floor.CFrame = hrp.CFrame * CFrame.new(0, -3, 0)
+	floor.Parent = workspace
+	table.insert(xzLockParts, floor)
 end
 
--- 🧩 Tạo GUI
-local function createFlyGui()
-if player.PlayerGui:FindFirstChild("StealFloor3Gui") then
-player.PlayerGui.StealFloor3Gui:Destroy()
+-- 🧩 Toggle Fly
+local function toggleFly()
+	flyRunning = not flyRunning
+	local char = player.Character or player.CharacterAdded:Wait()
+	local hrp = char:WaitForChild("HumanoidRootPart")
+
+	if flyRunning then
+		setAllPartsTransparency(0.8)
+		camera.CameraType = Enum.CameraType.Scriptable
+		task.spawn(function()
+			while flyRunning and hrp do
+				createXZLock(hrp)
+				camera.CFrame = CFrame.new(hrp.Position + Vector3.new(0, 14, 0), hrp.Position)
+				hrp.Velocity = Vector3.new(0, 80, 0)
+				RunService.Heartbeat:Wait()
+			end
+			if hrp then hrp.Velocity = Vector3.zero end
+			removeXZLock()
+		end)
+	else
+		camera.CameraType = Enum.CameraType.Custom
+		restorePartsTransparency()
+		removeXZLock()
+		if hrp then hrp.Velocity = Vector3.zero end
+	end
 end
 
-local gui = Instance.new("ScreenGui")  
-gui.Name = "StealFloor3Gui"  
-gui.ResetOnSpawn = false  
-gui.Parent = player:WaitForChild("PlayerGui")  
-
-local frame = Instance.new("Frame")  
-frame.Size = UDim2.new(0, 250, 0, 160)  
-frame.Position = UDim2.new(0.65, 0, 0.35, 0)  
-frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)  
-frame.Active = true  
-frame.Draggable = true  
-frame.Parent = gui  
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)  
-
-local title = Instance.new("TextLabel")  
-title.Size = UDim2.new(1, 0, 0, 30)  
-title.Text = "Steal Floor 3"  
-title.Font = Enum.Font.GothamBold  
-title.TextColor3 = Color3.fromRGB(255, 220, 120)  
-title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  
-title.TextSize = 18  
-title.Parent = frame  
-Instance.new("UICorner", title).CornerRadius = UDim.new(0, 8)  
-
-local scroll = Instance.new("ScrollingFrame")  
-scroll.Size = UDim2.new(1, 0, 1, -30)  
-scroll.Position = UDim2.new(0, 0, 0, 30)  
-scroll.CanvasSize = UDim2.new(0, 0, 0, 200)  
-scroll.ScrollBarThickness = 6  
-scroll.BackgroundTransparency = 1  
-scroll.Parent = frame  
-
-local layout = Instance.new("UIListLayout")  
-layout.Padding = UDim.new(0, 6)  
-layout.HorizontalAlignment = Enum.HorizontalAlignment.Center  
-layout.SortOrder = Enum.SortOrder.LayoutOrder  
-layout.Parent = scroll  
-
-local function subButton(text, callback)  
-	local btn = Instance.new("TextButton")  
-	btn.Size = UDim2.new(0.9, 0, 0, 40)  
-	btn.Text = text  
-	btn.Font = Enum.Font.GothamBold  
-	btn.TextSize = 16  
-	btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)  
-	btn.TextColor3 = Color3.new(1, 1, 1)  
-	btn.Parent = scroll  
-	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)  
-	btn.MouseButton1Click:Connect(callback)  
-	return btn  
-end  
-
--- 🔼 Fly Up  
-subButton("Fly Up", function()  
-	if flyRunning then return end  
-	flyRunning = true  
-
-	local char = player.Character or player.CharacterAdded:Wait()  
-	local hrp = char:WaitForChild("HumanoidRootPart")  
-
-	setAllPartsTransparency(0.8)  
-	createXZLock(hrp)  
-
-	task.spawn(function()  
-		while flyRunning and hrp do  
-			hrp.Velocity = Vector3.new(0, 100, 0)  
-			createXZLock(hrp)  
-			RunService.Heartbeat:Wait()  
-		end  
-
-		if hrp then  
-			hrp.Velocity = Vector3.zero  
-		end  
-		removeXZLock()  
-	end)  
-end)  
-
--- ❌ Stop Fly  
-subButton("Stop Fly", function()  
-	flyRunning = false  
-	restorePartsTransparency()  
-	removeXZLock()  
-
-	local char = player.Character  
-	if char and char:FindFirstChild("HumanoidRootPart") then  
-		char.HumanoidRootPart.Velocity = Vector3.zero  
-	end  
-end)  
-
--- ℹ️ Info  
-local info = Instance.new("TextLabel")  
-info.Size = UDim2.new(0.9, 0, 0, 30)  
-info.Text = "Steal floor by MCJ | MCJ BEST"  
-info.Font = Enum.Font.Gotham  
-info.TextSize = 14  
-info.TextColor3 = Color3.fromRGB(180, 180, 180)  
-info.BackgroundTransparency = 1  
-info.Parent = scroll
-
+-- 🧩 Giao diện có thể kéo
+local function createDraggable(frame)
+	local dragging, dragInput, dragStart, startPos
+	local function update(input)
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+	frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = frame.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+	UIS.InputChanged:Connect(function(input)
+		if input == dragInput and dragging then
+			update(input)
+		end
+	end)
+	frame.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+			dragInput = input
+		end
+	end)
 end
 
--- 🟢 Khi script chạy
-createFlyGui()
+-- 🧩 GUI chính
+local function createGui()
+	if player.PlayerGui:FindFirstChild("MCJFloorGui") then
+		player.PlayerGui.MCJFloorGui:Destroy()
+	end
+
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "MCJFloorGui"
+	gui.ResetOnSpawn = false
+	gui.Parent = player:WaitForChild("PlayerGui")
+
+	local main = Instance.new("Frame")
+	main.Size = UDim2.new(0, 150, 0, 70)
+	main.Position = UDim2.new(0.5, -75, 0.85, -50)
+	main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	main.BorderSizePixel = 0
+	main.Active = true
+	main.Parent = gui
+	Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+	createDraggable(main)
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, 0, 0, 25)
+	title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	title.Text = "MCJ FLOOR"
+	title.TextColor3 = Color3.fromRGB(255, 220, 120)
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 14
+	title.Parent = main
+	Instance.new("UICorner", title).CornerRadius = UDim.new(0, 10)
+
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0.8, 0, 0, 30)
+	button.Position = UDim2.new(0.1, 0, 0.45, 0)
+	button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	button.TextColor3 = Color3.fromRGB(255, 220, 120)
+	button.Font = Enum.Font.GothamBold
+	button.TextSize = 14
+	button.Text = "STEAL"
+	button.Parent = main
+	Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
+
+	button.MouseButton1Click:Connect(function()
+		toggleFly()
+		button.Text = flyRunning and "STOP" or "STEAL"
+		button.BackgroundColor3 = flyRunning and Color3.fromRGB(80, 40, 40) or Color3.fromRGB(50, 50, 50)
+	end)
+end
+
+createGui()
