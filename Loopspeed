@@ -1,19 +1,27 @@
--- LocalScript: StarterPlayerScripts/MCJ_LoopSpeed.lua
--- Khi bật: loop giữ speed = 50 trong 5s rồi trả lại bình thường
--- Có GUI nhỏ, kéo được, bật lại được nhiều lần
-
+-- LocalScript: StarterPlayerScripts/MCJ_Tools.lua
+-- Gui nhỏ kéo được + nút Kích Hoạt (loop speed) + nút MCJ Boost (float + infinite jump)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
 local player = Players.LocalPlayer
+local workspace = game:GetService("Workspace")
 
--- 🧍 Lấy humanoid
+-- ====== Config ======
+local LOOP_WALKSPEED = 50
+local LOOP_DURATION = 3          -- giữ speed trong bao nhiêu giây
+local LOOP_CHECK_INTERVAL = 0.05 -- internal heartbeat check interval while active
+
+local fallMultiplier = 0.65
+local moveMultiplier = 1
+
+-- ====== Utilities ======
 local function getHumanoid()
 	local char = player.Character or player.CharacterAdded:Wait()
 	return char:WaitForChild("Humanoid")
 end
 
--- 🎨 GUI setup
+-- ====== Build GUI ======
 local gui = Instance.new("ScreenGui")
 gui.Name = "MCJ_LoopSpeed"
 gui.ResetOnSpawn = false
@@ -21,31 +29,32 @@ gui.IgnoreGuiInset = true
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 160, 0, 70)
-frame.Position = UDim2.new(0.8, 0, 0.8, 0)
+frame.Size = UDim2.new(0, 180, 0, 100)
+frame.Position = UDim2.new(0.8, 0, 0.75, 0)
 frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-frame.BackgroundTransparency = 0.1
+frame.BackgroundTransparency = 0.08
 frame.Active = true
 frame.Draggable = true
 frame.Parent = gui
-
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
 local stroke = Instance.new("UIStroke", frame)
 stroke.Thickness = 1.2
 stroke.Color = Color3.fromRGB(60, 60, 60)
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 25)
+title.Size = UDim2.new(1, -10, 0, 26)
+title.Position = UDim2.new(0, 8, 0, 6)
 title.BackgroundTransparency = 1
 title.Font = Enum.Font.GothamBold
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextSize = 14
-title.Text = "⚡ MCJ Loop Speed"
+title.Text = "⚡ MCJ Boost"
+title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = frame
 
 local button = Instance.new("TextButton")
 button.Size = UDim2.new(0, 120, 0, 30)
-button.Position = UDim2.new(0.5, -60, 0.5, -5)
+button.Position = UDim2.new(0.5, -60, 0, 36)
 button.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
 button.TextColor3 = Color3.new(1, 1, 1)
 button.Font = Enum.Font.GothamBold
@@ -54,17 +63,32 @@ button.Text = "Kích Hoạt"
 button.Parent = frame
 Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
 
+local boostBtn = Instance.new("TextButton")
+boostBtn.Size = UDim2.new(0, 140, 0, 30)
+boostBtn.Position = UDim2.new(0.5, -70, 0, 70)
+boostBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+boostBtn.TextColor3 = Color3.fromRGB(0,0,0)
+boostBtn.Font = Enum.Font.GothamBold
+boostBtn.TextSize = 16
+boostBtn.Text = "inf jump"
+boostBtn.Parent = frame
+Instance.new("UICorner", boostBtn).CornerRadius = UDim.new(0, 8)
+
 local timerLabel = Instance.new("TextLabel")
-timerLabel.Size = UDim2.new(1, 0, 0, 20)
-timerLabel.Position = UDim2.new(0, 0, 1, -20)
+timerLabel.Size = UDim2.new(1, -12, 0, 18)
+timerLabel.Position = UDim2.new(0, 6, 0, 36 + 30 + 4)
 timerLabel.BackgroundTransparency = 1
 timerLabel.Font = Enum.Font.Gotham
 timerLabel.TextSize = 14
 timerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 timerLabel.Text = ""
+timerLabel.TextYAlignment = Enum.TextYAlignment.Top
 timerLabel.Parent = frame
 
--- ⚙️ Logic
+-- Adjust positions so label doesn't overlap (fine-tune)
+timerLabel.Position = UDim2.new(0, 6, 0, 36)
+
+-- ====== Loop Speed Logic ======
 local looping = false
 
 local function startSpeedLoop()
@@ -72,15 +96,18 @@ local function startSpeedLoop()
 	looping = true
 
 	local humanoid = getHumanoid()
+	if not humanoid then
+		looping = false
+		return
+	end
 	local originalSpeed = humanoid.WalkSpeed
-	local active = true
-	local timer = 3
 
-	-- Giao diện đổi màu
+	-- UI change
 	button.Text = "Đang chạy..."
 	button.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
 
-	-- Bắt đầu loop giữ tốc độ
+	local active = true
+	-- Heartbeat loop to enforce speed
 	local loopConn
 	loopConn = RunService.Heartbeat:Connect(function()
 		if not active then
@@ -88,20 +115,23 @@ local function startSpeedLoop()
 			return
 		end
 		if humanoid and humanoid.Parent then
-			humanoid.WalkSpeed = 50
+			humanoid.WalkSpeed = LOOP_WALKSPEED
 		end
 	end)
 
-	-- Đếm ngược 5 giây
-	while timer > 0 do
-		timerLabel.Text = "⏳ Còn " .. timer .. " giây"
+	-- countdown
+	local remaining = LOOP_DURATION
+	while remaining > 0 and active do
+		timerLabel.Text = "⏳ Còn " .. tostring(remaining) .. " giây"
 		task.wait(1)
-		timer -= 1
+		remaining = remaining - 1
 	end
 
-	-- Dừng loop
+	-- cleanup / restore
 	active = false
-	humanoid.WalkSpeed = originalSpeed
+	if humanoid and humanoid.Parent then
+		humanoid.WalkSpeed = originalSpeed
+	end
 	timerLabel.Text = "✅ Đã trở lại bình thường"
 	button.Text = "Kích Hoạt"
 	button.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
@@ -113,11 +143,138 @@ end
 
 button.MouseButton1Click:Connect(startSpeedLoop)
 
--- Reset khi respawn
-player.CharacterAdded:Connect(function()
-	task.wait(1)
+-- ====== Float + Infinite Jump (MCJ Boost) Logic ======
+local lp = player
+local floatConn, vecForce, att
+local infJumpConn = nil
+local isBoostOn = false
+
+local function startInfiniteJump()
+	if infJumpConn then return end
+	infJumpConn = UIS.JumpRequest:Connect(function()
+		if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+			-- small upward impulse
+			local hrp = lp.Character.HumanoidRootPart
+			-- preserve existing horizontal velocity
+			hrp.Velocity = Vector3.new(hrp.Velocity.X, 50, hrp.Velocity.Z)
+		end
+	end)
+end
+
+local function stopInfiniteJump()
+	if infJumpConn then
+		infJumpConn:Disconnect()
+		infJumpConn = nil
+	end
+end
+
+local function startFloat()
+	local char = lp.Character
+	if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+	local hrp = char.HumanoidRootPart
+
+	-- wait until roughly stable vertical velocity (like in provided code)
+	task.spawn(function()
+		while hrp and math.abs(hrp.Velocity.Y) > 5 do
+			task.wait(0.1)
+		end
+	end)
+	task.wait(0.2)
+
+	-- create attachment + vectorforce
+	att = Instance.new("Attachment")
+	att.Name = "MCJ_Float_Att"
+	att.Parent = hrp
+
+	vecForce = Instance.new("VectorForce")
+	vecForce.Name = "MCJ_Float_VF"
+	vecForce.Attachment0 = att
+	-- initial force; will update in RenderStepped
+	vecForce.Force = Vector3.new(0, workspace.Gravity * hrp.AssemblyMass * fallMultiplier, 0)
+	vecForce.RelativeTo = Enum.ActuatorRelativeTo.World
+	vecForce.Parent = hrp
+
+	floatConn = RunService.RenderStepped:Connect(function()
+		if vecForce and hrp then
+			local vel = hrp.Velocity
+			local forceY = workspace.Gravity * hrp.AssemblyMass * fallMultiplier
+			local forceXZ = Vector3.new(vel.X * moveMultiplier, 0, vel.Z * moveMultiplier)
+			vecForce.Force = Vector3.new(forceXZ.X, forceY, forceXZ.Z)
+		end
+	end)
+
+	startInfiniteJump()
+end
+
+local function stopFloat()
+	if floatConn then
+		floatConn:Disconnect()
+		floatConn = nil
+	end
+	if vecForce then
+		pcall(function() vecForce:Destroy() end)
+		vecForce = nil
+	end
+	if att then
+		pcall(function() att:Destroy() end)
+		att = nil
+	end
+	stopInfiniteJump()
+end
+
+-- toggle handler for boost button
+boostBtn.MouseButton1Click:Connect(function()
+	isBoostOn = not isBoostOn
+	if isBoostOn then
+		boostBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+		boostBtn.TextColor3 = Color3.fromRGB(255,255,255)
+		startFloat()
+	else
+		boostBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		boostBtn.TextColor3 = Color3.fromRGB(0,0,0)
+		stopFloat()
+	end
+end)
+
+-- ====== Cleanup on respawn ======
+local function resetStateOnSpawn()
+	-- restore walking speed if loop was interrupted
+	local ok, humanoid = pcall(getHumanoid)
+	if ok and humanoid then
+		-- no assumption about original speed here; set to default 16 if Humanoid exists but speed seems wrong
+		if humanoid.WalkSpeed ~= 16 then
+			-- try to set to 16 (roblox default); this avoids leaving players stuck if script died mid-loop
+			humanoid.WalkSpeed = 16
+		end
+	end
+
+	-- reset UI and flags
 	looping = false
 	timerLabel.Text = ""
 	button.Text = "Kích Hoạt"
 	button.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
+
+	-- stop boost effects
+	isBoostOn = false
+	boostBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	boostBtn.TextColor3 = Color3.fromRGB(0,0,0)
+	stopFloat()
+end
+
+player.CharacterAdded:Connect(function()
+	-- small delay to allow character objects to initialize
+	task.wait(1)
+	resetStateOnSpawn()
+end)
+
+-- Also reset immediately if player already has character
+if player.Character then
+	-- ensure clean state
+	resetStateOnSpawn()
+end
+
+-- ====== Extra safety: if script is destroyed, ensure cleanup ======
+script.Destroying:Connect(function()
+	stopFloat()
+	stopInfiniteJump()
 end)
