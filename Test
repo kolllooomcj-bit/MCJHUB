@@ -952,7 +952,7 @@ end)
 -- =========================
 -- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
-makeButton("FLOAT Gui", function()
+makeButton("Xray base", function()
 loadstring(game:HttpGet("https://pastefy.app/XytHFkBy/raw"))()
 end)
 
