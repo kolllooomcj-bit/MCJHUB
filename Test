@@ -100,10 +100,6 @@ makeButton("FLY TO BASE", function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/kolllooomcj-bit/MCJHUB/refs/heads/main/Flytobase"))()
 end)
 
-makeButton("use cloner", function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/kolllooomcj-bit/MCJHUB/refs/heads/main/Usetool"))()
-end)
-
 -- =========================
 -- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
@@ -123,6 +119,10 @@ end)
 -- =========================
 makeButton("SKYWALK", function()
 loadstring(game:HttpGet("https://pastefy.app/P2CWBaHF/raw"))()
+end)
+
+makeButton("USE CLONER", function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/kolllooomcj-bit/MCJHUB/refs/heads/main/Usetool"))()
 end)
 
 -- =========================
