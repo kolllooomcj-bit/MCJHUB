@@ -1,0 +1,153 @@
+-- 🕶️ MCJ Xray Base GUI
+
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+
+local RunService = game:GetService("RunService")
+
+local isXrayOn = false
+
+local originalProperties = {} -- lưu Material & Transparency gốc
+
+-- Toggle function
+
+local function toggleXray()
+
+	isXrayOn = not isXrayOn	for _, obj in pairs(workspace:GetDescendants()) do
+
+		if obj:IsA("BasePart") and obj.Name == "structure base home" then
+
+			if isXrayOn then
+
+				if not originalProperties[obj] then
+
+					originalProperties[obj] = {
+
+						Material = obj.Material,
+
+						Transparency = obj.Transparency
+
+					}
+
+				end
+
+				obj.Transparency = 0.9
+
+				obj.Material = Enum.Material.Neon
+
+			else
+
+				if originalProperties[obj] then
+
+					obj.Material = originalProperties[obj].Material
+
+					obj.Transparency = originalProperties[obj].Transparency
+
+					originalProperties[obj] = nil
+
+				end
+
+			end
+
+		end
+
+	end
+
+end
+
+-- ===== GUI =====
+
+local CoreGui = game:GetService("CoreGui")
+
+local gui = Instance.new("ScreenGui")
+
+gui.Name = "XrayBaseGUI"
+
+gui.Parent = CoreGui
+
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame")
+
+frame.Size = UDim2.new(0, 140, 0, 50)
+
+frame.Position = UDim2.new(0, 20, 0, 150)
+
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+frame.BackgroundTransparency = 0.15
+
+frame.BorderSizePixel = 0
+
+frame.Active = true
+
+frame.Draggable = true
+
+frame.Parent = gui
+
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+
+local title = Instance.new("TextLabel")
+
+title.Size = UDim2.new(1, -10, 0, 20)
+
+title.Position = UDim2.new(0, 5, 0, 5)
+
+title.BackgroundTransparency = 1
+
+title.Font = Enum.Font.GothamBold
+
+title.TextSize = 14
+
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+title.Text = "MCJ Xray Base"
+
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+title.Parent = frame
+
+local button = Instance.new("TextButton")
+
+button.Size = UDim2.new(1, -10, 0, 25)
+
+button.Position = UDim2.new(0, 5, 0, 22)
+
+button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+button.Font = Enum.Font.GothamBold
+
+button.TextScaled = true
+
+button.BorderSizePixel = 0
+
+button.Text = "OFF"
+
+button.Parent = frame
+
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
+
+-- Click event
+
+button.MouseButton1Click:Connect(function()
+
+	toggleXray()
+
+	if isXrayOn then
+
+		button.Text = "ON"
+
+		button.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+
+	else
+
+		button.Text = "OFF"
+
+		button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+
+	end
+
+end)
