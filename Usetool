@@ -1,60 +1,61 @@
---==[ MCJ Quantum Cloner GUI ]==--
+--// 🌪️ MCJ Combined GUI: Quantum Cloner + Aura Bat
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
 
--- GUI setup
+--== GUI ==--
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "MCJ_GUI"
-screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
+-- Frame chính kéo được
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 100)
-frame.Position = UDim2.new(0.5, -100, 0.5, -50)
+frame.Size = UDim2.new(0, 220, 0, 140)
+frame.Position = UDim2.new(0.5, -110, 0.5, -70)
 frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 frame.Active = true
 frame.Draggable = true
 frame.Parent = screenGui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
 
+-- Title
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 25)
+title.Size = UDim2.new(1,0,0,25)
+title.Position = UDim2.new(0,0,0,0)
 title.BackgroundTransparency = 1
-title.Text = "MCJ use cloner"
+title.Text = "MCJ Use tool"
 title.Font = Enum.Font.SourceSansBold
 title.TextScaled = true
 title.TextColor3 = Color3.fromRGB(255,255,255)
 title.Parent = frame
 
-local button = Instance.new("TextButton")
-button.Size = UDim2.new(0.8, 0, 0, 40)
-button.Position = UDim2.new(0.1, 0, 0.5, -20)
-button.Text = "Use"
-button.Font = Enum.Font.SourceSansBold
-button.TextScaled = true
-button.TextColor3 = Color3.fromRGB(0,0,0)
-button.BackgroundColor3 = Color3.fromRGB(255,100,100)
-Instance.new("UICorner", button).CornerRadius = UDim.new(0,8)
-button.Parent = frame
+--== Nút Quantum Cloner ==--
+local clonerBtn = Instance.new("TextButton")
+clonerBtn.Size = UDim2.new(0.8,0,0,35)
+clonerBtn.Position = UDim2.new(0.1,0,0.25,0)
+clonerBtn.Text = "Use Quantum Cloner"
+clonerBtn.Font = Enum.Font.SourceSansBold
+clonerBtn.TextScaled = true
+clonerBtn.TextColor3 = Color3.fromRGB(0,0,0)
+clonerBtn.BackgroundColor3 = Color3.fromRGB(255,100,100)
+Instance.new("UICorner", clonerBtn).CornerRadius = UDim.new(0,8)
+clonerBtn.Parent = frame
 
--- Function sử dụng Quantum Cloner + đổi cơ thể server-side
+-- Function sử dụng Quantum Cloner
 local function useQuantumCloner()
-	local success, err = pcall(function()
-		local backpack = LocalPlayer:WaitForChild("Backpack")
-		local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-		local humanoid = character:WaitForChild("Humanoid")
+	pcall(function()
+		local backpack = player:WaitForChild("Backpack")
+		local char = player.Character or player.CharacterAdded:Wait()
+		local humanoid = char:WaitForChild("Humanoid")
 
-		local packages = ReplicatedStorage:WaitForChild("Packages", 5)
-		if not packages then return end
-		local netFolder = packages:WaitForChild("Net", 5)
-		if not netFolder then return end
+		local packages = ReplicatedStorage:WaitForChild("Packages")
+		local netFolder = packages:WaitForChild("Net")
+		local useItemRemote = netFolder:WaitForChild("RE/UseItem")
+		local teleportRemote = netFolder:WaitForChild("RE/QuantumCloner/OnTeleport")
 
-		local useItemRemote = netFolder:WaitForChild("RE/UseItem", 5)
-		local teleportRemote = netFolder:WaitForChild("RE/QuantumCloner/OnTeleport", 5)
-		if not useItemRemote or not teleportRemote then return end
-
-		local tool = backpack:FindFirstChild("Quantum Cloner") or character:FindFirstChild("Quantum Cloner")
+		local tool = backpack:FindFirstChild("Quantum Cloner") or char:FindFirstChild("Quantum Cloner")
 		if not tool then
 			for _, i in ipairs(backpack:GetChildren()) do
 				if i:IsA("Tool") then
@@ -74,17 +75,67 @@ local function useQuantumCloner()
 		task.wait(0.1)
 		teleportRemote:FireServer()
 	end)
+end
 
-	if not success then
-		warn("Quantum Cloner Error:", err)
+clonerBtn.MouseButton1Click:Connect(function()
+	useQuantumCloner()
+	clonerBtn.BackgroundColor3 = Color3.fromRGB(100,255,100)
+	task.delay(0.3,function() clonerBtn.BackgroundColor3 = Color3.fromRGB(255,100,100) end)
+end)
+
+--== Nút Aura Bat ==--
+local auraBtn = Instance.new("TextButton")
+auraBtn.Size = UDim2.new(0.8,0,0,35)
+auraBtn.Position = UDim2.new(0.1,0,0.65,0)
+auraBtn.Text = "🔘 Aura Bat: OFF"
+auraBtn.Font = Enum.Font.GothamBold
+auraBtn.TextSize = 18
+auraBtn.TextColor3 = Color3.fromRGB(255,255,255)
+auraBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+Instance.new("UICorner", auraBtn).CornerRadius = UDim.new(0,10)
+local stroke = Instance.new("UIStroke", auraBtn)
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(80,80,80)
+auraBtn.AutoButtonColor = false
+auraBtn.Parent = frame
+
+-- Aura logic
+local auraActive = false
+local spinning = false
+
+local function toggleAura()
+	auraActive = not auraActive
+	auraBtn.Text = auraActive and "💫 Aura Bat: ON" or "🔘 Aura Bat: OFF"
+	auraBtn.BackgroundColor3 = auraActive and Color3.fromRGB(0,170,255) or Color3.fromRGB(50,50,50)
+	stroke.Color = auraActive and Color3.fromRGB(0,255,255) or Color3.fromRGB(80,80,80)
+
+	if auraActive and not spinning then
+		spinning = true
+		task.spawn(function()
+			while auraActive do
+				local char = player.Character
+				if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
+					local hrp = char.HumanoidRootPart
+					local tool = char:FindFirstChild("Bat") or player.Backpack:FindFirstChild("Bat")
+
+					-- Equip Bat nếu chưa có
+					if tool and tool.Parent ~= char then
+						char.Humanoid:EquipTool(tool)
+					end
+
+					-- Xoay nhanh + dùng tool
+					if tool then
+						hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(45), 0)
+						pcall(function() tool:Activate() end)
+					end
+				end
+				task.wait(0.05)
+			end
+			spinning = false
+		end)
 	end
 end
 
--- Nút nhấn
-button.MouseButton1Click:Connect(function()
-	useQuantumCloner()
-	button.BackgroundColor3 = Color3.fromRGB(100,255,100)
-	task.delay(0.3, function()
-		button.BackgroundColor3 = Color3.fromRGB(255,100,100)
-	end)
-end)
+-- Hiệu ứng nhấn nút
+auraBtn.MouseButton1Down:Connect(function() auraBtn.BackgroundColor3 = Color3.fromRGB(20,20,20) end)
+auraBtn.MouseButton1Up:Connect(toggleAura)
