@@ -1,0 +1,90 @@
+--==[ MCJ Quantum Cloner GUI ]==--
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+-- GUI setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "MCJ_GUI"
+screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 200, 0, 100)
+frame.Position = UDim2.new(0.5, -100, 0.5, -50)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.Active = true
+frame.Draggable = true
+frame.Parent = screenGui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 25)
+title.BackgroundTransparency = 1
+title.Text = "MCJ use cloner"
+title.Font = Enum.Font.SourceSansBold
+title.TextScaled = true
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Parent = frame
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0.8, 0, 0, 40)
+button.Position = UDim2.new(0.1, 0, 0.5, -20)
+button.Text = "Clone & Switch"
+button.Font = Enum.Font.SourceSansBold
+button.TextScaled = true
+button.TextColor3 = Color3.fromRGB(0,0,0)
+button.BackgroundColor3 = Color3.fromRGB(255,100,100)
+Instance.new("UICorner", button).CornerRadius = UDim.new(0,8)
+button.Parent = frame
+
+-- Function sử dụng Quantum Cloner + đổi cơ thể server-side
+local function useQuantumCloner()
+	local success, err = pcall(function()
+		local backpack = LocalPlayer:WaitForChild("Backpack")
+		local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+		local humanoid = character:WaitForChild("Humanoid")
+
+		local packages = ReplicatedStorage:WaitForChild("Packages", 5)
+		if not packages then return end
+		local netFolder = packages:WaitForChild("Net", 5)
+		if not netFolder then return end
+
+		local useItemRemote = netFolder:WaitForChild("RE/UseItem", 5)
+		local teleportRemote = netFolder:WaitForChild("RE/QuantumCloner/OnTeleport", 5)
+		if not useItemRemote or not teleportRemote then return end
+
+		local tool = backpack:FindFirstChild("Quantum Cloner") or character:FindFirstChild("Quantum Cloner")
+		if not tool then
+			for _, i in ipairs(backpack:GetChildren()) do
+				if i:IsA("Tool") then
+					tool = i
+					break
+				end
+			end
+		end
+
+		if tool and tool.Parent == backpack then
+			humanoid:EquipTool(tool)
+			task.wait(0.1)
+		end
+
+		task.wait(0.1)
+		useItemRemote:FireServer()
+		task.wait(0.1)
+		teleportRemote:FireServer()
+	end)
+
+	if not success then
+		warn("Quantum Cloner Error:", err)
+	end
+end
+
+-- Nút nhấn
+button.MouseButton1Click:Connect(function()
+	useQuantumCloner()
+	button.BackgroundColor3 = Color3.fromRGB(100,255,100)
+	task.delay(0.3, function()
+		button.BackgroundColor3 = Color3.fromRGB(255,100,100)
+	end)
+end)
