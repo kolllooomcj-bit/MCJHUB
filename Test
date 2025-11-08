@@ -950,6 +950,13 @@ loadstring(game:HttpGet("https://pastefy.app/YkHHDqR2/raw"))()
 end)
 
 -- =========================
+-- NÚT 3: FLOAT Gui (Pastefy)
+-- =========================
+makeButton("FLOAT Gui", function()
+loadstring(game:HttpGet("https://pastefy.app/XytHFkBy/raw"))()
+end)
+
+-- =========================
 -- Hide/Show Button (luôn góc trên phải)
 -- =========================
 local toggleBtn = Instance.new("TextButton", gui)
