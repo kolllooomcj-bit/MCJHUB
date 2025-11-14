@@ -246,6 +246,14 @@ subButton("🔼 Throw Up", 140, function()
 end)
 
 end)
+
+-- =========================
+-- NÚT 3: FLOAT Gui (Pastefy)
+-- =========================
+makeButton("Anti push", function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/kolllooomcj-bit/MCJHUB/refs/heads/main/Anti%20push"))()
+end)
+
 -- =========================
 -- NÚT 1: Float + ESP (MCJ.lua)
 -- =========================
