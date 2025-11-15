@@ -250,6 +250,13 @@ end)
 -- =========================
 -- NÚT 3: FLOAT Gui (Pastefy)
 -- =========================
+makeButton("MCJ BOOST", function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/kolllooomcj-bit/MCJPRIVATESCRIPTCODE8901873782899191963780192983737037085538CR037085538/refs/heads/main/Codemcj0369712762079841958065110003567518036971276203697127620369712762079841958065110003567518651100035675180369712762079841958003697127626511000356751803697127620798419580"))()
+end)
+
+-- =========================
+-- NÚT 3: FLOAT Gui (Pastefy)
+-- =========================
 makeButton("Anti push", function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/kolllooomcj-bit/MCJHUB/refs/heads/main/Anti%20push"))()
 end)
