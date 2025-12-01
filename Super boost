@@ -1,0 +1,219 @@
+--// UI SETUP
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local fallMultiplier = 1
+local jumpPower = 60
+local targetSpeed = 130
+
+local superBoostEnabled = false
+local speedLoop, grappleLoop, equipLoop, infJumpConn, floatConn
+local vecForce, att
+
+--------------------------
+--  CREATE GUI
+--------------------------
+
+local ScreenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+ScreenGui.ResetOnSpawn = false
+
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 200, 0, 120)
+Frame.Position = UDim2.new(0.05, 0, 0.35, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Frame.BorderSizePixel = 0
+
+local UICorner = Instance.new("UICorner", Frame)
+UICorner.CornerRadius = UDim.new(0, 10)
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Text = "MCJ SUPER BOOST"
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundTransparency = 1
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextScaled = true
+
+local SpeedBox = Instance.new("TextBox", Frame)
+SpeedBox.PlaceholderText = "Speed (30 - 180)"
+SpeedBox.Text = "130"
+SpeedBox.Size = UDim2.new(1, -20, 0, 30)
+SpeedBox.Position = UDim2.new(0, 10, 0, 40)
+SpeedBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+SpeedBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", SpeedBox)
+
+local Toggle = Instance.new("TextButton", Frame)
+Toggle.Text = "BẬT"
+Toggle.Size = UDim2.new(1, -20, 0, 30)
+Toggle.Position = UDim2.new(0, 10, 0, 80)
+Toggle.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+Instance.new("UICorner", Toggle)
+
+--------------------------
+--  FUNCTIONS
+--------------------------
+
+local function startFloat()
+    local char = player.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local hrp = char.HumanoidRootPart
+
+    if vecForce then vecForce:Destroy() vecForce = nil end
+    if att then att:Destroy() att = nil end
+
+    task.wait(0.2)
+    att = Instance.new("Attachment", hrp)
+    vecForce = Instance.new("VectorForce")
+    vecForce.Attachment0 = att
+    vecForce.Force = Vector3.new(0, workspace.Gravity * hrp.AssemblyMass * fallMultiplier, 0)
+    vecForce.RelativeTo = Enum.ActuatorRelativeTo.World
+    vecForce.Parent = hrp
+
+    floatConn = RunService.RenderStepped:Connect(function()
+        if vecForce and hrp then
+            local vel = hrp.Velocity
+            local forceY = workspace.Gravity * hrp.AssemblyMass * fallMultiplier
+            vecForce.Force = Vector3.new(vel.X, forceY, vel.Z)
+        end
+    end)
+end
+
+local function stopFloat()
+    if floatConn then floatConn:Disconnect() floatConn = nil end
+    if vecForce then vecForce:Destroy() vecForce = nil end
+    if att then att:Destroy() att = nil end
+end
+
+local function equipGrappleTool()
+    pcall(function()
+        local backpack = player:FindFirstChild("Backpack")
+        if backpack then
+            for _, item in pairs(backpack:GetChildren()) do
+                if item:IsA("Tool") and (string.find(item.Name:lower(), "grapple") or string.find(item.Name:lower(), "hook")) then
+                    player.Character:WaitForChild("Humanoid"):EquipTool(item)
+                    break
+                end
+            end
+        end
+    end)
+end
+
+local function useGrapple()
+    pcall(function()
+        local grappleRemote = ReplicatedStorage:WaitForChild("Packages"):WaitForChild("Net"):WaitForChild("RE/UseItem")
+        grappleRemote:FireServer(0)
+    end)
+end
+
+local function startInfiniteJump()
+    if infJumpConn then infJumpConn:Disconnect() end
+    infJumpConn = RunService.Heartbeat:Connect(function()
+        local character = player.Character
+        if character and character:FindFirstChild("Humanoid") and character:FindFirstChild("HumanoidRootPart") then
+            local humanoid = character.Humanoid
+            local hrp = character.HumanoidRootPart
+            if humanoid:GetState() == Enum.HumanoidStateType.Jumping then
+                hrp.Velocity = Vector3.new(hrp.Velocity.X, jumpPower, hrp.Velocity.Z)
+            end
+        end
+    end)
+end
+
+local function stopInfiniteJump()
+    if infJumpConn then infJumpConn:Disconnect() infJumpConn = nil end
+end
+
+local function enableSpeedBoost()
+    if speedLoop then speedLoop:Disconnect() end
+    speedLoop = RunService.Heartbeat:Connect(function()
+        local character = player.Character
+        if character and character:FindFirstChild("Humanoid") and character:FindFirstChild("HumanoidRootPart") then
+            local humanoid = character.Humanoid
+            local hrp = character.HumanoidRootPart
+            local moveDirection = humanoid.MoveDirection
+            if moveDirection.Magnitude > 0 then
+                local velocity = moveDirection * targetSpeed
+                hrp.Velocity = Vector3.new(velocity.X, hrp.Velocity.Y, velocity.Z)
+            end
+        end
+    end)
+end
+
+local function enableGrapple()
+    if grappleLoop then grappleLoop:Disconnect() end
+    grappleLoop = RunService.Heartbeat:Connect(function()
+        useGrapple()
+    end)
+end
+
+local function enableAutoEquip()
+    if equipLoop then equipLoop:Disconnect() end
+    equipLoop = RunService.Heartbeat:Connect(function()
+        equipGrappleTool()
+    end)
+end
+
+local function enableSuperBoost()
+    if superBoostEnabled then return end
+    superBoostEnabled = true
+
+    enableAutoEquip()
+    task.wait(0.5)
+    startFloat()
+    enableSpeedBoost()
+    enableGrapple()
+    startInfiniteJump()
+
+    player.CharacterAdded:Connect(function()
+        if superBoostEnabled then
+            task.wait(2)
+            enableSuperBoost()
+        end
+    end)
+
+    Toggle.Text = "TẮT"
+    Toggle.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+end
+
+local function disableSuperBoost()
+    if not superBoostEnabled then return end
+    superBoostEnabled = false
+
+    if speedLoop then speedLoop:Disconnect() speedLoop = nil end
+    if grappleLoop then grappleLoop:Disconnect() grappleLoop = nil end
+    if equipLoop then equipLoop:Disconnect() equipLoop = nil end
+
+    stopInfiniteJump()
+    stopFloat()
+
+    Toggle.Text = "BẬT"
+    Toggle.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+end
+
+--------------------------
+--  UI EVENTS
+--------------------------
+
+SpeedBox.FocusLost:Connect(function()
+    local num = tonumber(SpeedBox.Text)
+    if not num then
+        SpeedBox.Text = tostring(targetSpeed)
+        return
+    end
+
+    if num < 30 then num = 30 end
+    if num > 180 then num = 180 end
+    targetSpeed = num
+    SpeedBox.Text = tostring(num)
+end)
+
+Toggle.MouseButton1Click:Connect(function()
+    if superBoostEnabled then
+        disableSuperBoost()
+    else
+        enableSuperBoost()
+    end
+end)
